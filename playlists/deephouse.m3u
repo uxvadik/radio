@@ -1,0 +1,25 @@
+#EXTM3U
+#EXTINF:-1,DHR FM - Deep House Radio (Romania)
+http://live.dancemusic.ro:7000/radio.mp3
+#EXTINF:-1,DEEP ONE - Deep House Radio (Russia)
+http://play.deep1.ru:8000/deep1mp3
+#EXTINF:-1,1.FM Deep House
+http://strm112.1.fm/deephouse_mobile_mp3
+#EXTINF:-1,1.FM Deep Techno & Tech House
+http://strm112.1.fm/deeptech_mobile_mp3
+#EXTINF:-1,bigFM Deep & Tech House (Germany)
+https://audiotainment-sw.streamabc.net/atsw-deeptechhouse-mp3-128-3635448
+#EXTINF:-1,Deep Depot FM (laut.fm, Germany)
+https://deepdepot.stream.laut.fm/deep_depot
+#EXTINF:-1,Deep Tech Club (laut.fm, Germany)
+https://deep-tech-club.stream.laut.fm/deep-tech-club
+#EXTINF:-1,RadioGoose Deep (Russia)
+https://stream2.radiogoose.ru/listen/deep/play
+#EXTINF:-1,Deep House Station - Loops Radio
+http://loopsdeep.ozelip.com:7806/stream/1/
+#EXTINF:-1,DeepPort Radio
+https://stream04.pcradio.app/deepport_radio-hi
+#EXTINF:-1,Deeper Shades Radio Network (Canada)
+https://andromeda.housejunkie.ca/radio/8000/radio.mp3
+#EXTINF:-1,SomaFM Beat Blender (Deep House / Downtempo)
+https://ice1.somafm.com/beatblender-128-mp3

@@ -1,0 +1,33 @@
+#EXTM3U
+#EXTINF:-1,CoveRadio Rock (каверы, coveradio.net)
+https://app.coveradio.net/listen/radio/radio.mp3
+#EXTINF:-1,CoveRadio Jazz (каверы, coveradio.net)
+https://app.coveradio.net/listen/jazz/radio.mp3
+#EXTINF:-1,CoveRadio Dance (каверы, coveradio.net)
+https://app.coveradio.net/listen/dance/radio.mp3
+#EXTINF:-1,Радио Шоколад (Radio Chocolate Cover FM, Москва 98FM)
+http://choco.hostingradio.ru:10010/fm
+#EXTINF:-1,Радио Монте Карло - Covers (каверы)
+https://mc-covers.hostingradio.ru/mccovers96.aacp
+#EXTINF:-1,Maximum Cover (каверы)
+https://maximum-cover.hostingradio.ru/maxcover96.aacp
+#EXTINF:-1,DFM REMAKE (каверы/ремейки)
+https://dfm-remake.hostingradio.ru/remake96.aacp
+#EXTINF:-1,SomaFM Covers (только каверы, США)
+https://ice1.somafm.com/covers-128-mp3
+#EXTINF:-1,ROCK ANTENNE Coversongs (каверы в стиле рок, Германия)
+https://stream.rockantenne.de/coversongs/stream/mp3
+#EXTINF:-1,Antyradio Covers (каверы, Польша)
+http://an.cdn.eurozet.pl/ANTCOV.mp3
+#EXTINF:-1,Chilli ZET Covers (каверы, Польша)
+https://ch02.cdn.eurozet.pl/CHICOV.mp3
+#EXTINF:-1,100% COVERS LOUNGE (Торонто)
+https://az1.mediacp.eu:443/listen/100coverslounge/stream
+#EXTINF:-1,Epic Lounge - Lounge Covers (лаунж-каверы, Германия)
+https://stream.epic-lounge.com/lounge-covers
+#EXTINF:-1,Piano CoverHits (фортепианные каверы, Epic Piano)
+https://stream.epic-piano.com/piano-coverhits
+#EXTINF:-1,Radio Gong München - Akustic Covers (акустические каверы)
+http://radiogong-channel08.cast.addradio.de/radiogong/channel08/mp3/high
+#EXTINF:-1,Intamixx Radio (машапы/ремейки хитов)
+http://intamixx.no-ip.com:8000/;

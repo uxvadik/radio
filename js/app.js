@@ -1,0 +1,659 @@
+// Точка входа: связывает хранилище, каталог, плеер и интерфейс.
+import { store, favorites, recent, uid } from './store.js';
+import { Player } from './player.js';
+import { resolveNowPlaying, fetchText } from './metadata.js';
+import { parsePlaylist, makeStation } from './m3u.js';
+import { searchStations, PRESETS, BUNDLED } from './radio.js';
+import { ui, h, $ } from './ui.js';
+
+const player = new Player($('#audio'));
+
+let currentStations = [];
+let currentPlaylistId = store.get('activePlaylistId');
+let metaTimer = null;
+let metaToken = 0;
+let searchTimer = null;
+let deferredPrompt = null;
+
+// ------------------------------------------------------------------ тема
+function resolvedTheme() {
+  const t = store.get('theme');
+  if (t === 'auto') return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return t;
+}
+function applyTheme() {
+  document.documentElement.dataset.theme = resolvedTheme();
+  const meta = document.querySelector('meta[name="theme-color"]');
+  // основной theme-color оставляем системным; фон меняет CSS
+  if (meta) meta.setAttribute('content', resolvedTheme() === 'dark' ? '#0b0e14' : '#eef1f7');
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (store.get('theme') === 'auto') applyTheme();
+});
+
+// ---------------------------------------------------------------- playlists
+function customPlaylists() {
+  return store.get('customPlaylists');
+}
+
+const bundledCache = new Map();
+async function loadBundled(b) {
+  if (bundledCache.has(b.id)) return bundledCache.get(b.id);
+  const text = await fetchText(b.url, []);
+  const list = text ? parsePlaylist(text) : [];
+  bundledCache.set(b.id, list);
+  return list;
+}
+
+function allPlaylists() {
+  const list = [
+    { id: 'fav', name: 'Избранное', kind: 'fav' },
+  ];
+  if (store.get('recent').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
+  list.push(...BUNDLED.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
+  list.push(...PRESETS.map((p) => ({ id: p.id, name: p.name, kind: 'preset', query: p.query })));
+  list.push(...customPlaylists().map((p) => ({ id: p.id, name: p.name, kind: 'm3u', removable: p.id !== 'mine' })));
+  return list;
+}
+
+function renderTabs() {
+  ui.renderTabs(allPlaylists(), currentPlaylistId);
+}
+
+async function selectPlaylist(id, { silent } = {}) {
+  currentPlaylistId = id;
+  store.set({ activePlaylistId: id });
+  if (!silent) exitSearch();
+  renderTabs();
+
+  if (id === 'fav') {
+    currentStations = store.get('favorites');
+    renderList();
+    ui.setStatus('избранное');
+    return;
+  }
+  if (id === 'recent') {
+    currentStations = store.get('recent');
+    renderList();
+    ui.setStatus('недавние');
+    return;
+  }
+
+  const bundled = BUNDLED.find((b) => b.id === id);
+  if (bundled) {
+    ui.setLoading();
+    try {
+      const list = await loadBundled(bundled);
+      if (currentPlaylistId !== id) return;
+      currentStations = list;
+      renderList();
+      ui.setStatus(bundled.name);
+      if (!list.length) ui.setMessage('Плейлист пуст.');
+    } catch {
+      if (currentPlaylistId !== id) return;
+      ui.setMessage('Не удалось загрузить встроенный плейлист.');
+    }
+    return;
+  }
+
+  const preset = PRESETS.find((p) => p.id === id);
+  if (preset) {
+    ui.setLoading();
+    try {
+      const list = await searchStations(preset.query);
+      if (currentPlaylistId !== id) return;
+      currentStations = list;
+      renderList();
+      ui.setStatus(`${preset.name.toLowerCase()} · каталог`);
+    } catch (e) {
+      if (currentPlaylistId !== id) return;
+      ui.setMessage('Каталог недоступен.<br>Проверь интернет и попробуй снова.');
+      ui.setStatus('ошибка каталога');
+    }
+    return;
+  }
+
+  const custom = customPlaylists().find((p) => p.id === id);
+  if (custom) {
+    if (custom.stations && custom.stations.length) {
+      currentStations = custom.stations;
+      renderList();
+      ui.setStatus(custom.name);
+      return;
+    }
+    ui.setLoading();
+    try {
+      const text = await fetchText(custom.url, store.get('proxies'));
+      const list = text ? parsePlaylist(text) : [];
+      const cached = customPlaylists().map((p) => (p.id === id ? { ...p, stations: list, updated: Date.now() } : p));
+      store.set({ customPlaylists: cached });
+      if (currentPlaylistId !== id) return;
+      currentStations = list;
+      renderList();
+      ui.setStatus(`${custom.name} · ${list.length}`);
+      if (!list.length) ui.setMessage('Плейлист пуст или не удалось прочитать.<br>Проверь ссылку.');
+    } catch {
+      if (currentPlaylistId !== id) return;
+      ui.setMessage('Не удалось загрузить плейлист.<br>Некоторые ссылки требуют CORS-прокси — проверь настройки.');
+      ui.setStatus('ошибка плейлиста');
+    }
+  }
+}
+
+// -------------------------------------------------------------------- список
+function renderList() {
+  const set = new Set();
+  store.get('favorites').forEach((s) => {
+    set.add(s.id);
+    set.add(s.url);
+  });
+  ui.renderList(currentStations, {
+    activeUrl: player.station && player.station.url,
+    playing: player.playing,
+    favoritesSet: set,
+  });
+}
+
+function pickStation(i) {
+  const s = currentStations[i];
+  if (!s) return;
+  if (player.station && player.station.url === s.url && player.audio.src) {
+    player.toggle();
+    return;
+  }
+  recent.push(s);
+  player.playStation(s, currentStations, i);
+  updateFavButton();
+  renderList();
+}
+
+// -------------------------------------------------------------------- поиск
+function enterSearch() {
+  document.body.dataset.mode = 'search';
+}
+function exitSearch() {
+  const input = $('#search');
+  if (input && input.value) input.value = '';
+  $('#search-clear').hidden = true;
+  delete document.body.dataset.mode;
+}
+
+function onSearchInput() {
+  const term = $('#search').value.trim();
+  $('#search-clear').hidden = !term;
+  clearTimeout(searchTimer);
+  if (term.length < 2) {
+    if (document.body.dataset.mode === 'search') selectPlaylist(currentPlaylistId, { silent: true });
+    return;
+  }
+  enterSearch();
+  ui.setLoading();
+  ui.setStatus('поиск…');
+  searchTimer = setTimeout(async () => {
+    try {
+      const list = await searchStations({ name: term, order: 'clickcount', reverse: 'true', limit: '80' });
+      currentStations = list;
+      renderList();
+      ui.setStatus(`поиск: «${term}»`);
+    } catch {
+      ui.setMessage('Поиск недоступен. Проверь интернет.');
+    }
+  }, 450);
+}
+
+// ------------------------------------------------------------------- player
+function badgeFor({ loading, error, station, playing }) {
+  if (error) return 'ERR';
+  if (loading) return 'LOAD';
+  if (!station) return 'IDLE';
+  if (playing) return 'LIVE';
+  return 'PAUSE';
+}
+
+function trackText(st) {
+  if (player.nowPlaying) return player.nowPlaying;
+  if (st.error) return st.error;
+  if (!st.station) return 'потоковое радио';
+  if (st.loading) return 'подключаюсь к потоку…';
+  if (st.playing) return 'в эфире — без данных о треке';
+  return st.station.name + ' — на паузе';
+}
+
+player.on('station', (station) => {
+  ui.setPlayerInfo({ station, badge: 'LOAD', track: 'подключаюсь к потоку…', playing: false });
+  ui.setStatus('буферизация…');
+  updateFavButton();
+  startMetadata();
+});
+
+player.on('state', (st) => {
+  document.body.classList.toggle('playing', st.playing);
+  ui.setPlayerInfo({
+    station: st.station,
+    badge: badgeFor(st),
+    track: trackText(st),
+    playing: st.playing,
+  });
+  if (st.error) ui.setStatus(st.error);
+  else if (st.playing) ui.setStatus('в эфире');
+  renderList();
+});
+
+player.on('error', ({ error }) => ui.toast(error));
+player.on('nowplaying', () => {
+  ui.setTrack(trackText({ playing: player.playing, loading: player.loading, error: player.error, station: player.station }));
+});
+
+player.on('volume', ({ volume, muted }) => {
+  ui.setVolumeBar(muted ? 0 : volume);
+  ui.setMuted(muted);
+});
+
+// ---------------------------------------------------------------- метаданные
+function startMetadata() {
+  stopMetadata();
+  metaToken++;
+  player.setNowPlaying('');
+  if (!store.get('metadata')) return;
+  refreshNowPlaying();
+  const sec = Math.max(5, Number(store.get('metadataInterval')) || 15);
+  metaTimer = setInterval(refreshNowPlaying, sec * 1000);
+}
+function stopMetadata() {
+  if (metaTimer) clearInterval(metaTimer);
+  metaTimer = null;
+}
+async function refreshNowPlaying() {
+  const s = player.station;
+  if (!s || player.audio.paused) return;
+  const token = metaToken;
+  try {
+    const res = await resolveNowPlaying(s, {
+      proxies: store.get('proxies'),
+      metaUrl: store.get('metaUrls')[s.id],
+    });
+    if (token !== metaToken) return;
+    player.setNowPlaying(res ? res.raw : '');
+  } catch {
+    /* тихо игнорируем */
+  }
+}
+
+// ------------------------------------------------------------- избранное
+function updateFavButton() {
+  ui.setFav(!!(player.station && favorites.has(player.station)));
+}
+
+// ------------------------------------------------------------------- шиты
+function openAddSheet() {
+  const nameInput = h('input', { type: 'text', placeholder: 'Название (напр. Свои радио)' });
+  const urlInput = h('input', { type: 'text', placeholder: 'https://example.com/list.m3u', inputmode: 'url' });
+
+  const sName = h('input', { type: 'text', placeholder: 'Название станции' });
+  const sUrl = h('input', { type: 'text', placeholder: 'https://stream.example.com:8000/live', inputmode: 'url' });
+  const sMeta = h('input', { type: 'text', placeholder: 'URL метаданных (необязательно)', inputmode: 'url' });
+
+  const body = h('div', {},
+    h('div', { class: 'section-title' }, 'Плейлист M3U'),
+    h('div', { class: 'field' }, h('label', {}, 'Название'), nameInput),
+    h('div', { class: 'field' }, h('label', {}, 'Ссылка на .m3u / .m3u8'), urlInput,
+      h('div', { class: 'hint' }, 'Файл подхватится через CORS-прокси, если сервер не отдаёт заголовки.')),
+    h('button', { class: 'btn primary', onClick: () => addM3U(nameInput.value, urlInput.value) }, 'Добавить плейлист'),
+
+    h('div', { class: 'section-title' }, 'Отдельная станция'),
+    h('div', { class: 'field' }, h('label', {}, 'Название'), sName),
+    h('div', { class: 'field' }, h('label', {}, 'Прямая ссылка на поток'), sUrl),
+    h('div', { class: 'field' }, h('label', {}, 'Свой URL метаданных'), sMeta),
+    h('button', { class: 'btn', onClick: () => addStream(sName.value, sUrl.value, sMeta.value) }, 'Добавить станцию'),
+
+    h('div', { class: 'section-title' }, 'Мои плейлисты'),
+    ...manageList()
+  );
+  ui.openSheet('Добавить', body);
+}
+
+function manageList() {
+  const cps = customPlaylists();
+  if (!cps.length) return [h('div', { class: 'hint' }, 'Пока ничего не добавлено.')];
+  return cps.map((p) =>
+    h('div', { class: 'manage-item' },
+      h('div', { class: 'mi-info' },
+        h('div', { class: 'mi-name' }, p.name),
+        h('div', { class: 'mi-sub' }, p.url ? p.url : `${(p.stations || []).length} станций`)
+      ),
+      h('button', {
+        class: 'icon-btn',
+        type: 'button',
+        title: 'Удалить',
+        onClick: () => {
+          if (p.id === 'mine') {
+            store.set({ customPlaylists: cps.filter((x) => x.id !== 'mine') });
+          } else {
+            store.set({ customPlaylists: cps.filter((x) => x.id !== p.id) });
+          }
+          ui.toast('Удалено: ' + p.name);
+          if (currentPlaylistId === p.id) selectPlaylist('top');
+          else renderTabs();
+          openAddSheet();
+        },
+      }, h('span', { class: 'ico ico-close' }))
+    )
+  );
+}
+
+async function addM3U(name, url) {
+  url = (url || '').trim();
+  if (!/^https?:\/\//i.test(url)) return ui.toast('Укажи ссылку http(s)://…');
+  let finalName = (name || '').trim();
+  if (!finalName) {
+    try {
+      finalName = new URL(url).hostname;
+    } catch {
+      finalName = 'Плейлист';
+    }
+  }
+  const pl = { id: uid(), name: finalName, url, stations: [] };
+  store.set({ customPlaylists: [...customPlaylists(), pl] });
+  ui.closeSheet();
+  ui.toast('Плейлист добавлен');
+  await selectPlaylist(pl.id);
+}
+
+function ensureMine() {
+  let mine = customPlaylists().find((p) => p.id === 'mine');
+  if (!mine) {
+    mine = { id: 'mine', name: 'Мои станции', url: '', stations: [] };
+    store.set({ customPlaylists: [...customPlaylists(), mine] });
+  }
+  return mine;
+}
+
+function addStream(name, url, metaUrl) {
+  url = (url || '').trim();
+  if (!/^https?:\/\//i.test(url)) return ui.toast('Укажи ссылку http(s)://…');
+  const station = makeStation({ name: (name || '').trim() || url, url }, 'custom');
+  const mine = ensureMine();
+  const stations = [station, ...(mine.stations || [])];
+  store.update((st) => ({
+    customPlaylists: st.customPlaylists.map((p) => (p.id === 'mine' ? { ...p, stations } : p)),
+    metaUrls: metaUrl ? { ...st.metaUrls, [station.id]: metaUrl.trim() } : st.metaUrls,
+  }));
+  ui.closeSheet();
+  ui.toast('Станция добавлена');
+  selectPlaylist('mine');
+}
+
+function openSettingsSheet() {
+  const themeSel = h('select', {},
+    h('option', { value: 'dark' }, 'Тёмная'),
+    h('option', { value: 'light' }, 'Светлая'),
+    h('option', { value: 'auto' }, 'Как в системе')
+  );
+  themeSel.value = store.get('theme');
+
+  const metaChk = h('input', { type: 'checkbox', checked: store.get('metadata') });
+  const interval = h('input', { type: 'number', min: '5', max: '120', value: store.get('metadataInterval') });
+  const proxies = h('textarea', { class: 'proxy-area' });
+  proxies.value = store.get('proxies').join('\n');
+  proxies.style.cssText = 'width:100%;min-height:96px;padding:11px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;font:12px var(--mono);color:var(--text);outline:none';
+
+  const importFile = h('input', { type: 'file', accept: '.json,application/json', hidden: true });
+
+  const body = h('div', {},
+    h('div', { class: 'section-title' }, 'Внешний вид'),
+    h('div', { class: 'field' }, h('label', {}, 'Тема'), themeSel),
+
+    h('div', { class: 'section-title' }, 'Метаданные «сейчас играет»'),
+    h('label', { class: 'switch' },
+      h('span', {}, h('span', { class: 'sw-txt' }, 'Показывать трек'), h('div', { class: 'sw-sub' }, 'Читаем статус Icecast/SHOUTcast через прокси')),
+      metaChk
+    ),
+    h('div', { class: 'field', style: { marginTop: '12px' } }, h('label', {}, 'Интервал обновления, сек'), interval),
+    h('div', { class: 'field' }, h('label', {}, 'CORS-прокси (по одному в строке, {url} — место ссылки)'), proxies,
+      h('div', { class: 'hint' }, 'Прокси нужны, т.к. серверы радио не отдают CORS-заголовки. Если один не работает — попробуй другой.'))
+,
+    h('button', { class: 'btn primary', onClick: () => {
+      const list = proxies.value.split('\n').map((s) => s.trim()).filter(Boolean);
+      store.set({
+        theme: themeSel.value,
+        metadata: metaChk.checked,
+        metadataInterval: Math.max(5, Number(interval.value) || 15),
+        proxies: list,
+      });
+      applyTheme();
+      startMetadata();
+      ui.toast('Настройки сохранены');
+      ui.closeSheet();
+    } }, 'Сохранить'),
+
+    h('div', { class: 'section-title' }, 'Данные'),
+    h('div', { class: 'btn-row' },
+      h('button', { class: 'btn', onClick: exportData }, 'Экспорт'),
+      h('button', { class: 'btn', onClick: () => importFile.click() }, 'Импорт')
+    ),
+    h('div', { class: 'btn-row', style: { marginTop: '8px' } },
+      h('button', { class: 'btn danger', onClick: () => {
+        if (confirm('Сбросить все настройки, избранное и плейлисты?')) {
+          store.reset();
+          location.reload();
+        }
+      } }, 'Сбросить всё')
+    ),
+    importFile,
+    h('div', { class: 'hint', style: { marginTop: '14px' } }, 'Установка: открой меню браузера → «Добавить на главный экран». На iPhone — «Поделиться» → «На экран Домой».')
+  );
+
+  importFile.addEventListener('change', async () => {
+    const file = importFile.files[0];
+    if (!file) return;
+    try {
+      store.import(await file.text());
+      applyTheme();
+      location.reload();
+    } catch {
+      ui.toast('Некорректный файл');
+    }
+  });
+
+  ui.openSheet('Настройки', body);
+}
+
+function exportData() {
+  const blob = new Blob([store.export()], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'radio-player-settings.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  ui.toast('Файл сохранён');
+}
+
+function openStationSheet(index) {
+  const s = currentStations[index];
+  if (!s) return;
+  const isCustom = s.source === 'custom' || s.source === 'm3u';
+  const nameInput = h('input', { type: 'text', value: s.name });
+  const urlInput = h('input', { type: 'text', value: s.url, inputmode: 'url' });
+  const metaInput = h('input', { type: 'text', value: store.get('metaUrls')[s.id] || '', placeholder: 'напр. https://host:8000/status-json.xsl', inputmode: 'url' });
+
+  const favLabel = favorites.has(s) ? 'Убрать из избранного' : 'В избранное';
+
+  const body = h('div', {},
+    h('div', { class: 'field' }, h('label', {}, 'Название'), nameInput),
+    h('div', { class: 'field' }, h('label', {}, 'Поток'), urlInput),
+    h('div', { class: 'field' }, h('label', {}, 'Свой URL метаданных'), metaInput,
+      h('div', { class: 'hint' }, 'Если трек не определяется автоматически — укажи страницу Icecast (/status-json.xsl) или SHOUTcast (/7.html).')),
+
+    h('button', { class: 'btn', onClick: () => {
+      const on = favorites.toggle({ ...s, name: nameInput.value.trim() || s.name });
+      updateFavButton();
+      renderList();
+      ui.toast(on ? 'Добавлено в избранное' : 'Убрано из избранного');
+      ui.closeSheet();
+    } }, favLabel),
+
+    h('div', { class: 'btn-row', style: { marginTop: '8px' } },
+      h('button', { class: 'btn primary', onClick: () => {
+        const name = nameInput.value.trim() || s.name;
+        const url = urlInput.value.trim() || s.url;
+        const metaUrl = metaInput.value.trim();
+        store.update((st) => ({
+          metaUrls: { ...st.metaUrls, [s.id]: metaUrl },
+          customPlaylists: st.customPlaylists.map((p) => ({
+            ...p,
+            stations: (p.stations || []).map((x) => (x.id === s.id ? { ...x, name, url } : x)),
+          })),
+          favorites: st.favorites.map((x) => (x.id === s.id ? { ...x, name, url } : x)),
+        }));
+        if (player.station && player.station.url === s.url) {
+          player.station.name = name;
+          player.station.url = url;
+        }
+        startMetadata();
+        renderList();
+        ui.toast('Сохранено');
+        ui.closeSheet();
+      } }, 'Сохранить'),
+
+      isCustom
+        ? h('button', { class: 'btn danger', onClick: () => {
+            store.update((st) => ({
+              customPlaylists: st.customPlaylists.map((p) => ({
+                ...p,
+                stations: (p.stations || []).filter((x) => x.id !== s.id),
+              })),
+              favorites: st.favorites.filter((x) => x.id !== s.id),
+            }));
+            currentStations = currentStations.filter((x) => x.id !== s.id);
+            renderList();
+            ui.toast('Удалено');
+            ui.closeSheet();
+          } }, 'Удалить')
+        : null
+    )
+  );
+  ui.openSheet('Станция', body);
+}
+
+// ------------------------------------------------------------------- UI bind
+function bindTopbar() {
+  $('#btn-theme').addEventListener('click', () => {
+    const order = ['dark', 'light', 'auto'];
+    const next = order[(order.indexOf(store.get('theme')) + 1) % order.length];
+    store.set({ theme: next });
+    applyTheme();
+    ui.toast({ dark: 'Тёмная тема', light: 'Светлая тема', auto: 'Как в системе' }[next]);
+  });
+
+  $('#btn-settings').addEventListener('click', openSettingsSheet);
+  $('#btn-add').addEventListener('click', openAddSheet);
+  $('#btn-play').addEventListener('click', () => {
+    if (!player.station && currentStations.length) pickStation(0);
+    else player.toggle();
+  });
+  $('#btn-next').addEventListener('click', () => player.next());
+  $('#btn-prev').addEventListener('click', () => player.prev());
+  $('#btn-mute').addEventListener('click', () => {
+    const muted = !store.get('muted');
+    store.set({ muted });
+    player.setMuted(muted);
+    ui.setMuted(muted);
+    ui.setVolumeBar(muted ? 0 : store.get('volume'));
+  });
+  $('#btn-fav').addEventListener('click', () => {
+    if (!player.station) return ui.toast('Сначала включи станцию');
+    const added = favorites.toggle(player.station);
+    updateFavButton();
+    renderTabs();
+    renderList();
+    ui.toast(added ? 'В избранном' : 'Убрано из избранного');
+  });
+
+  const vol = $('#vol');
+  vol.addEventListener('input', () => {
+    const v = Number(vol.value) / 100;
+    store.set({ volume: v, muted: false });
+    player.setVolume(v);
+    player.setMuted(false);
+    ui.setVolumeBar(v);
+    ui.setMuted(false);
+  });
+
+  $('#search').addEventListener('input', onSearchInput);
+  $('#search-clear').addEventListener('click', () => {
+    $('#search').value = '';
+    $('#search-clear').hidden = true;
+    selectPlaylist(currentPlaylistId, { silent: true });
+  });
+
+  $('#tabs').addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('[data-remove]');
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    if (removeBtn && tab.dataset.id) {
+      const id = tab.dataset.id;
+      store.set({ customPlaylists: customPlaylists().filter((p) => p.id !== id) });
+      ui.toast('Плейлист удалён');
+      if (currentPlaylistId === id) selectPlaylist('top');
+      else renderTabs();
+      return;
+    }
+    selectPlaylist(tab.dataset.id);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, select')) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      player.toggle();
+    } else if (e.code === 'ArrowRight') player.next();
+    else if (e.code === 'ArrowLeft') player.prev();
+  });
+}
+
+ui.onPick = pickStation;
+ui.onLongPress = openStationSheet;
+
+// ------------------------------------------------------------------- start
+function init() {
+  applyTheme();
+  bindTopbar();
+
+  const vol = store.get('volume');
+  player.setVolume(vol);
+  player.setMuted(store.get('muted'));
+  ui.setVolumeBar(store.get('muted') ? 0 : vol);
+  ui.setMuted(store.get('muted'));
+
+  const last = store.get('lastStation');
+  ui.setPlayerInfo({
+    station: last,
+    badge: 'IDLE',
+    track: last ? last.name : 'потоковое радио',
+    playing: false,
+  });
+
+  renderTabs();
+  const validIds = allPlaylists().map((p) => p.id);
+  if (!validIds.includes(currentPlaylistId)) currentPlaylistId = 'top';
+  selectPlaylist(currentPlaylistId, { silent: true });
+}
+
+player.on('state', (st) => {
+  if (st.station) store.set({ lastStation: st.station });
+});
+
+init();
+
+// --------------------------------------------------------------------- PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('SW не зарегистрирован', e));
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+window.addEventListener('appinstalled', () => ui.toast('Установлено!'));

@@ -1,0 +1,7 @@
+name = "radio-proxy"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# Деплой:  npx wrangler deploy
+# После деплоя вставь адрес воркера в «Настройки → CORS-прокси» приложения:
+#   https://radio-proxy.<твой-поддомен>.workers.dev/?url={url}
