@@ -2,11 +2,38 @@
 import { store, favorites, recent, uid } from './store.js';
 import { Player } from './player.js';
 import { resolveNowPlaying, fetchText } from './metadata.js';
+import { NoiseEngine } from './noise.js';
 import { parsePlaylist, makeStation } from './m3u.js';
 import { searchStations, PRESETS, BUNDLED } from './radio.js';
 import { ui, h, $ } from './ui.js';
 
 const player = new Player($('#audio'));
+
+const noise = new NoiseEngine([
+  './sample/2.mp3',
+  './sample/3.mp3',
+  './sample/4.mp3',
+  './sample/1.mp3',
+]);
+noise.enabled = store.get('noise');
+
+const NOISE_DELAY = 250; // мс буферизации до включения шума
+let noiseTimer = null;
+
+function applyNoiseVolume() {
+  noise.setVolume((store.get('muted') ? 0 : store.get('volume')) * 0.4);
+}
+function scheduleNoise() {
+  clearTimeout(noiseTimer);
+  noiseTimer = setTimeout(() => {
+    if (player.loading && !player.audio.paused) noise.start();
+  }, NOISE_DELAY);
+}
+function cancelNoise() {
+  clearTimeout(noiseTimer);
+  noiseTimer = null;
+  noise.stop();
+}
 
 let currentStations = [];
 let currentPlaylistId = store.get('activePlaylistId');
@@ -224,6 +251,7 @@ player.on('station', (station) => {
   ui.setStatus('буферизация…');
   updateFavButton();
   startMetadata();
+  noise.unlock(); // разблокируем Web Audio внутри жеста пользователя
 });
 
 player.on('state', (st) => {
@@ -238,6 +266,10 @@ player.on('state', (st) => {
   else if (st.playing) ui.setStatus('в эфире');
   renderList();
   if (st.playing) refreshNowPlaying();
+
+  const wantsPlay = !!st.station && !player.audio.paused;
+  if (st.loading && wantsPlay && store.get('noise')) scheduleNoise();
+  else cancelNoise();
 });
 
 player.on('error', ({ error }) => ui.toast(error));
@@ -393,6 +425,7 @@ function openSettingsSheet() {
   themeSel.value = store.get('theme');
 
   const metaChk = h('input', { type: 'checkbox', checked: store.get('metadata') });
+  const noiseChk = h('input', { type: 'checkbox', checked: store.get('noise') });
   const interval = h('input', { type: 'number', min: '5', max: '120', value: store.get('metadataInterval') });
   const proxies = h('textarea', { class: 'proxy-area' });
   proxies.value = store.get('proxies').join('\n');
@@ -420,12 +453,21 @@ function openSettingsSheet() {
         metadata: metaChk.checked,
         metadataInterval: Math.max(5, Number(interval.value) || 15),
         proxies: list,
+        noise: noiseChk.checked,
       });
       applyTheme();
       startMetadata();
+      noise.enabled = noiseChk.checked;
+      if (!noiseChk.checked) noise.stop();
       ui.toast('Настройки сохранены');
       ui.closeSheet();
     } }, 'Сохранить'),
+
+    h('div', { class: 'section-title' }, 'Звук'),
+    h('label', { class: 'switch' },
+      h('span', {}, h('span', { class: 'sw-txt' }, 'Шумы при буферизации'), h('div', { class: 'sw-sub' }, 'Радиопомехи вместо тишины, пока грузится поток')),
+      noiseChk
+    ),
 
     h('div', { class: 'section-title' }, 'Данные'),
     h('div', { class: 'btn-row' },
@@ -583,6 +625,7 @@ function bindTopbar() {
     player.setMuted(muted);
     ui.setMuted(muted);
     ui.setVolumeBar(muted ? 0 : store.get('volume'));
+    applyNoiseVolume();
   });
   $('#btn-fav').addEventListener('click', () => {
     if (!player.station) return ui.toast('Сначала включи станцию');
@@ -601,6 +644,7 @@ function bindTopbar() {
     player.setMuted(false);
     ui.setVolumeBar(v);
     ui.setMuted(false);
+    applyNoiseVolume();
   });
 
   $('#search').addEventListener('input', onSearchInput);
@@ -648,6 +692,7 @@ function init() {
   player.setMuted(store.get('muted'));
   ui.setVolumeBar(store.get('muted') ? 0 : vol);
   ui.setMuted(store.get('muted'));
+  applyNoiseVolume();
 
   const last = store.get('lastStation');
   ui.setPlayerInfo({

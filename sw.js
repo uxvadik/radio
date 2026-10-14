@@ -11,6 +11,11 @@ const ASSETS = [
   './js/radio.js',
   './js/m3u.js',
   './js/metadata.js',
+  './js/noise.js',
+  './sample/1.mp3',
+  './sample/2.mp3',
+  './sample/3.mp3',
+  './sample/4.mp3',
   './manifest.webmanifest',
   './playlists/altrock.m3u',
   './playlists/covera.m3u',
@@ -53,6 +58,7 @@ self.addEventListener('fetch', (event) => {
 
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
   if (req.destination === 'audio' || req.destination === 'video') return;
+  if (/\.wav$/i.test(url.pathname)) return; // сэмплы шумов не кэшируем
 
   if (req.mode === 'navigate') {
     event.respondWith(fetch(req).catch(() => caches.match('./index.html')));

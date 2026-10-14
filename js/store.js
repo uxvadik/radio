@@ -7,6 +7,7 @@ const DEFAULTS = {
   muted: false,
   metadata: true,
   metadataInterval: 15, // сек
+  noise: true,          // шумы радио при буферизации
   proxies: [
     'https://api.allorigins.win/raw?url={url}',
     'https://api.codetabs.com/v1/proxy?quest={url}',

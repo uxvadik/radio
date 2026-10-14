@@ -19,6 +19,9 @@ PWA прямо с GitHub Pages — любому, у кого есть ссылк
   станции по прямой ссылке на поток.
 - **«Сейчас играет»**: читаем метаданные Icecast (`/status-json.xsl`) и SHOUTcast
   (`/7.html`, `/stats?json=1`) через настраиваемый CORS-прокси.
+- **Шумы радио при буферизации**: вместо тишины (особенно в наушниках) на время
+  загрузки потока играют помехи из `sample/*.mp3` (Web Audio, с фейдами). Включается
+  только при долгой буферизации, не при старте приложения. Отключается в настройках.
 - **Поиск** станций по всему каталогу radio-browser.
 - **Избранное**, **недавние**, Media Session (управление с экрана блокировки),
   громкость, горячие клавиши на десктопе.
@@ -83,9 +86,11 @@ js/store.js                состояние + localStorage
 js/player.js               <audio>, Media Session
 js/radio.js                каталог radio-browser + встроенные плейлисты
 js/metadata.js             Icecast/SHOUTcast «сейчас играет» + прокси
+js/noise.js                шумы радио при буферизации (Web Audio)
 js/m3u.js                  парсер m3u/m3u8/pls
 js/ui.js                   рендер списка/табов/шитов
 playlists/*.m3u            встроенные плейлисты
+sample/*.mp3               сэмплы шумов для буферизации (mono mp3, ~336 КБ)
 worker/                    CORS-прокси для Cloudflare Workers
 sw.js, manifest.webmanifest, icons/
 tools/make-icons.mjs       генератор иконок (node tools/make-icons.mjs)
