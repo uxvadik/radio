@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v2';
+const CACHE = 'radio-shell-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,12 @@ const ASSETS = [
   './playlists/covera.m3u',
   './playlists/deephouse.m3u',
   './playlists/jazz.m3u',
+  './playlists/gta-3.m3u',
+  './playlists/gta-vc.m3u',
+  './playlists/gta-sa.m3u',
+  './playlists/gta-4.m3u',
+  './playlists/gta-lcs.m3u',
+  './playlists/gta-vcs.m3u',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

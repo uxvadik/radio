@@ -12,8 +12,9 @@ PWA прямо с GitHub Pages — любому, у кого есть ссылк
 ## Возможности
 
 - **Предустановленные плейлисты**: собственные m3u (Alt Rock, Каверы, Deep House,
-  Jazz) + категории каталога [radio-browser.info](https://www.radio-browser.info/)
-  (Топ, Россия, Поп, Рок, Джаз, Новости и т.д.).
+  Jazz), радиостанции из GTA (III, Vice City, San Andreas, IV, LCS, VCS — 70 потоков
+  с [gtaradio.net](https://gtaradio.net)) + категории каталога
+  [radio-browser.info](https://www.radio-browser.info/) (Топ, Россия, Поп, Рок и т.д.).
 - **Свой контент**: добавление любого `.m3u`/`.m3u8` по ссылке или отдельной
   станции по прямой ссылке на поток.
 - **«Сейчас играет»**: читаем метаданные Icecast (`/status-json.xsl`) и SHOUTcast

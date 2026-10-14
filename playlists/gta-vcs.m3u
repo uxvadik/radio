@@ -1,0 +1,19 @@
+#EXTM3U
+#EXTINF:-1,Flash FM
+https://audio.gtaradio.net/vcs/flash
+#EXTINF:-1,V-Rock
+https://audio.gtaradio.net/vcs/vrock
+#EXTINF:-1,Paradise FM
+https://audio.gtaradio.net/vcs/paradise
+#EXTINF:-1,VCPR
+https://audio.gtaradio.net/vcs/vcpr
+#EXTINF:-1,VCFL
+https://audio.gtaradio.net/vcs/vcfl
+#EXTINF:-1,Wave 103
+https://audio.gtaradio.net/vcs/wave
+#EXTINF:-1,Fever 105
+https://audio.gtaradio.net/vcs/fresh
+#EXTINF:-1,Espantoso
+https://audio.gtaradio.net/vcs/espant
+#EXTINF:-1,Emotion 98.3
+https://audio.gtaradio.net/vcs/emotion

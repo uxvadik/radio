@@ -66,13 +66,27 @@ async function tryFetch(url, proxies, perTryMs = 6000) {
   return null;
 }
 
-function splitArtistTitle(text) {
-  const m = text.match(/^(.*?)\s+[-–—]\s+(.*)$/);
-  if (m) return { artist: m[1].trim(), title: m[2].trim() };
-  return { artist: '', title: text.trim() };
+function decodeEntities(s) {
+  return String(s)
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .trim();
 }
 
-function parseIcecast(text) {
+function splitArtistTitle(text) {
+  const clean = decodeEntities(text);
+  const m = clean.match(/^(.*?)\s+[-–—]\s+(.*)$/);
+  if (m) return { artist: m[1].trim(), title: m[2].trim() };
+  return { artist: '', title: clean };
+}
+
+function parseIcecast(text, mountPath) {
   let data;
   try {
     data = JSON.parse(text);
@@ -83,11 +97,21 @@ function parseIcecast(text) {
   let source = stats.source;
   if (!source) return null;
   if (Array.isArray(source)) {
-    source = source.find((s) => (s.title || s.songtitle || s.artist)) || source[0];
+    // у сервера может быть много монтов — ищем свой по пути потока
+    const byMount = mountPath
+      ? source.find((s) => {
+          try {
+            return new URL(s.listenurl).pathname === mountPath;
+          } catch {
+            return false;
+          }
+        })
+      : null;
+    source = byMount || source.find((s) => s.title || s.songtitle || s.artist) || source[0];
   }
   const raw = (source.title || source.songtitle || source.yp_currently_playing || '').trim();
   if (!raw) return null;
-  return { raw, ...splitArtistTitle(raw), server: (source.server_name || '').trim(), source: 'icecast' };
+  return { raw: decodeEntities(raw), ...splitArtistTitle(raw), server: (source.server_name || '').trim(), source: 'icecast' };
 }
 
 function parseIcecastXsl(html) {
@@ -151,10 +175,18 @@ function parseAzuraCast(text) {
   };
 }
 
-function parseStatusText(text) {
+function parseStatusText(text, streamUrl) {
   const t = text.trim();
   if (!t) return null;
-  if (t[0] === '{' || t[0] === '[') return parseAzuraCast(t) || parseIcecast(t) || parseShoutcastJson(t);
+  let mountPath = '';
+  if (streamUrl) {
+    try {
+      mountPath = new URL(streamUrl).pathname;
+    } catch {
+      mountPath = '';
+    }
+  }
+  if (t[0] === '{' || t[0] === '[') return parseAzuraCast(t) || parseIcecast(t, mountPath) || parseShoutcastJson(t);
   if (/<html|<\/body>|<\/table>/i.test(t)) return parseShoutcast7(t) || parseIcecastXsl(t);
   return null;
 }
@@ -170,7 +202,7 @@ export async function resolveNowPlaying(station, opts = {}) {
   for (const url of urls) {
     const text = await tryFetch(url, proxies);
     if (text) {
-      const parsed = parseStatusText(text);
+      const parsed = parseStatusText(text, station.url);
       if (parsed) return parsed;
     }
   }

@@ -237,6 +237,7 @@ player.on('state', (st) => {
   if (st.error) ui.setStatus(st.error);
   else if (st.playing) ui.setStatus('в эфире');
   renderList();
+  if (st.playing) refreshNowPlaying();
 });
 
 player.on('error', ({ error }) => ui.toast(error));
