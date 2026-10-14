@@ -52,7 +52,7 @@ function applyTheme() {
   document.documentElement.dataset.theme = resolvedTheme();
   const meta = document.querySelector('meta[name="theme-color"]');
   // основной theme-color оставляем системным; фон меняет CSS
-  if (meta) meta.setAttribute('content', resolvedTheme() === 'dark' ? '#0b0e14' : '#eef1f7');
+  if (meta) meta.setAttribute('content', resolvedTheme() === 'dark' ? '#07080a' : '#c6cad1');
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (store.get('theme') === 'auto') applyTheme();
