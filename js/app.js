@@ -648,8 +648,42 @@ init();
 
 // --------------------------------------------------------------------- PWA
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('SW не зарегистрирован', e));
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+      const hadController = !!navigator.serviceWorker.controller;
+
+      const checkForUpdate = () => reg.update().catch(() => {});
+      // проверяем при возврате в приложение и раз в час
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) checkForUpdate();
+      });
+      setInterval(checkForUpdate, 60 * 60 * 1000);
+
+      let reloading = false;
+      const reload = () => {
+        if (reloading) return;
+        reloading = true;
+        location.reload();
+      };
+
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state !== 'installed' || !navigator.serviceWorker.controller) return;
+          // новый SW готов; если ничего не играет — обновляемся молча
+          if (!player.playing) reload();
+          else ui.toast('Обновление готово — перезапусти приложение', 4000);
+        });
+      });
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !player.playing) reload();
+      });
+    } catch (e) {
+      console.warn('SW не зарегистрирован', e);
+    }
   });
 }
 
