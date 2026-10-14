@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v7';
+const CACHE = 'radio-shell-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -28,10 +28,15 @@ const ASSETS = [
   './playlists/gta-lcs.m3u',
   './playlists/gta-vcs.m3u',
   './icons/icon-192.png',
+  './icons/icon-384.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
+  './icons/favicon-16.png',
   './icons/favicon-32.png',
+  './icons/favicon-48.png',
+  './icons/favicon.ico',
 ];
 
 self.addEventListener('install', (event) => {
