@@ -658,9 +658,13 @@ function bindTopbar() {
   $('#tabs').addEventListener(
     'wheel',
     (e) => {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // горизонтальный жест — как есть
       e.preventDefault();
-      e.currentTarget.scrollLeft += e.deltaY;
+      const el = e.currentTarget;
+      let d = e.deltaY;
+      if (e.deltaMode === 1) d *= 28; // строки (Firefox)
+      else if (e.deltaMode === 2) d *= el.clientWidth; // страницы
+      el.scrollLeft += d;
     },
     { passive: false }
   );
