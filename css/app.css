@@ -257,8 +257,12 @@ body.playing .spectrum i:nth-child(7n) { animation-duration: 1.05s; }
   border-color: color-mix(in srgb, var(--accent) 60%, #000 20%);
   color: #04120a;
   box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: filter .15s var(--ease), transform .08s var(--ease), box-shadow .15s var(--ease);
 }
-.controls .play:hover { background: var(--accent); }
+.controls .play:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff 8%), color-mix(in srgb, var(--accent) 80%, #000 20%));
+  filter: brightness(1.08);
+}
 .controls .play .ico { width: 26px; height: 26px; }
 
 .vol {
