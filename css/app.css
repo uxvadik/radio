@@ -57,6 +57,9 @@ html, body {
   color: var(--text);
   font-family: var(--font);
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
   overscroll-behavior-y: none;
 }
 

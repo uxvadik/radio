@@ -654,6 +654,17 @@ function bindTopbar() {
     selectPlaylist(currentPlaylistId, { silent: true });
   });
 
+  // колесо мыши по ленте вкладок листает её по горизонтали (тачпад умеет сам)
+  $('#tabs').addEventListener(
+    'wheel',
+    (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      e.currentTarget.scrollLeft += e.deltaY;
+    },
+    { passive: false }
+  );
+
   $('#tabs').addEventListener('click', (e) => {
     const removeBtn = e.target.closest('[data-remove]');
     const tab = e.target.closest('.tab');
@@ -713,6 +724,11 @@ player.on('state', (st) => {
 });
 
 init();
+
+// запрет зума (pinch на iOS, где user-scalable игнорируется)
+['gesturestart', 'gesturechange', 'gestureend'].forEach((ev) =>
+  document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+);
 
 // --------------------------------------------------------------------- PWA
 if ('serviceWorker' in navigator) {
