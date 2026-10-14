@@ -43,9 +43,9 @@ html[data-theme="dark"] {
   --btn-ico: #cdd2da;
   --groove: #101318;
   --groove-shadow: inset 0 1px 3px rgba(0, 0, 0, .65), 0 1px 0 rgba(255, 255, 255, .06);
-  --screw:
-    linear-gradient(135deg, transparent 43%, rgba(0, 0, 0, .75) 45% 55%, transparent 57%),
-    radial-gradient(circle at 34% 28%, #7d848f 0%, #3f444d 50%, #1e2126 78%, #0c0e11 100%);
+  --screw-head: radial-gradient(circle 3.3px at 50% 50%, #a4aab4 0%, #565d68 40%, #2b2f36 75%, #171a1e 90%, transparent 96%);
+  --screw-slot-a: linear-gradient(130deg, transparent 42%, rgba(0, 0, 0, .8) 46% 54%, transparent 58%);
+  --screw-slot-b: linear-gradient(65deg, transparent 42%, rgba(0, 0, 0, .8) 46% 54%, transparent 58%);
   --thumb:
     repeating-linear-gradient(90deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px),
     linear-gradient(180deg, #f5f6f8 0%, #c9cdd4 45%, #8f96a1 100%);
@@ -82,9 +82,9 @@ html[data-theme="light"] {
   --btn-ico: #3a4048;
   --groove: #bcc1c9;
   --groove-shadow: inset 0 1px 3px rgba(0, 0, 0, .3), 0 1px 0 rgba(255, 255, 255, .7);
-  --screw:
-    linear-gradient(135deg, transparent 43%, rgba(0, 0, 0, .4) 45% 55%, transparent 57%),
-    radial-gradient(circle at 34% 28%, #ffffff 0%, #cfd4da 50%, #a0a6af 80%, #7c828b 100%);
+  --screw-head: radial-gradient(circle 3.3px at 50% 50%, #eef1f4 0%, #c6cbd2 45%, #9ba2ac 78%, #7d848e 92%, transparent 96%);
+  --screw-slot-a: linear-gradient(130deg, transparent 42%, rgba(30, 34, 40, .5) 46% 54%, transparent 58%);
+  --screw-slot-b: linear-gradient(65deg, transparent 42%, rgba(30, 34, 40, .5) 46% 54%, transparent 58%);
   --thumb:
     repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px),
     linear-gradient(180deg, #ffffff 0%, #d2d6dc 45%, #9aa1ab 100%);
@@ -190,21 +190,32 @@ body.playing .brand-dot { animation: pulse 1.4s var(--ease) infinite; }
   overflow: hidden;
 }
 
-/* винты на лицевой панели */
-.player::before {
+/* винты на лицевой панели: ::before — шляпки, ::after — шлицы */
+.player::before,
+.player::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--screw), var(--screw), var(--screw), var(--screw);
-  background-size: 7px 7px;
-  background-position:
-    10px 10px,
-    calc(100% - 10px) 10px,
-    10px calc(100% - 10px),
-    calc(100% - 10px) calc(100% - 10px);
   background-repeat: no-repeat;
-  opacity: .9;
+}
+.player::before {
+  background-image: var(--screw-head), var(--screw-head), var(--screw-head), var(--screw-head);
+  background-size: 8px 8px;
+  background-position:
+    9px 9px,
+    calc(100% - 9px) 9px,
+    9px calc(100% - 9px),
+    calc(100% - 9px) calc(100% - 9px);
+}
+.player::after {
+  background-image: var(--screw-slot-a), var(--screw-slot-b), var(--screw-slot-b), var(--screw-slot-a);
+  background-size: 4px 4px;
+  background-position:
+    11px 11px,
+    calc(100% - 11px) 11px,
+    11px calc(100% - 11px),
+    calc(100% - 11px) calc(100% - 11px);
 }
 
 /* --------------------------------------------------------------- VFD-стекло */
