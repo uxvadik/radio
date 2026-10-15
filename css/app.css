@@ -129,15 +129,26 @@ button, input { font-family: inherit; color: inherit; }
 }
 
 @media (min-width: 620px) {
-  body { background: #040506; }
-  html[data-theme="light"] body { background: #aeb3bb; }
+  body {
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+    background: radial-gradient(130% 120% at 50% 0%, #12151b 0%, #07080a 55%, #050609 100%);
+  }
+  html[data-theme="light"] body {
+    background: radial-gradient(130% 120% at 50% 0%, #ffffff 0%, #dfe3e9 55%, #c6cad1 100%);
+  }
+  /* «айфонная» рамка: шире не растягивается, какой бы ни было окно */
   .app {
-    height: calc(100dvh - 32px);
-    margin: 16px auto;
-    border-radius: 24px;
+    width: 430px;
+    max-width: 430px;
+    height: min(932px, calc(100dvh - 48px));
+    margin: 0;
+    border-radius: 26px;
     border: 1px solid var(--line-2);
     box-shadow: inset 0 1px 0 var(--hi), var(--shadow);
   }
+  .sheet { max-width: 430px; }
 }
 
 /* ------------------------------------------------------------------ topbar */
