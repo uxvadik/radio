@@ -417,6 +417,94 @@ function addStream(name, url, metaUrl) {
   selectPlaylist('mine');
 }
 
+function detectOS() {
+  const ua = navigator.userAgent || '';
+  const touch = navigator.maxTouchPoints || 0;
+  if (/iPhone|iPod/i.test(ua)) return 'ios';
+  if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && touch > 1)) return 'ios';
+  if (/Android/i.test(ua)) return 'android';
+  if (/Windows/i.test(ua)) return 'windows';
+  if (/Macintosh|Mac OS X/i.test(ua)) return 'macos';
+  return 'other';
+}
+
+function isInstalled() {
+  try {
+    return (
+      store.get('installed') ||
+      (window.matchMedia &&
+        (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: minimal-ui)').matches)) ||
+      navigator.standalone === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+function installSteps() {
+  if (/Firefox|FxiOS/i.test(navigator.userAgent)) {
+    return {
+      note: 'В Firefox установка недоступна. Откройте сайт в Chrome, Edge или Safari — там можно поставить как приложение.',
+      steps: [],
+    };
+  }
+  switch (detectOS()) {
+    case 'ios':
+      return {
+        steps: [
+          'Откройте сайт в Safari',
+          'Нажмите «Поделиться» (квадрат со стрелкой)',
+          'Пролистайте и выберите «На экран „Домой“»',
+          'Включите «Открыть как веб-приложение» → «Добавить»',
+        ],
+      };
+    case 'android':
+      return { steps: ['Меню ⋮ справа сверху', '«Установить приложение»', 'Подтвердите «Установить»'] };
+    case 'macos': {
+      const isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome|Chromium|Edg|OPR/i.test(navigator.userAgent);
+      return {
+        steps: isSafari
+          ? ['В меню Safari: File → Add to Dock', 'Задайте имя → «Add»']
+          : ['Иконка установки в адресной строке справа', 'или ⋮ → «Установить приложение…»'],
+      };
+    }
+    case 'windows':
+      return { steps: ['Иконка установки в адресной строке справа', 'или ⋮ → «Установить приложение…»'] };
+    default:
+      return { steps: ['Откройте меню браузера', '«Установить приложение» / «Add to Home screen»'] };
+  }
+}
+
+function buildInstallCard() {
+  if (isInstalled()) return null;
+  const { steps, note } = installSteps();
+
+  const children = [
+    h('h3', {}, h('span', { class: 'ico ico-install' }), 'Установить приложение'),
+    h('p', { class: 'ic-note' }, 'Иконка на экране, полный экран без адресной строки, запуск в один тап. Реагирует на кнопки на наушниках и медиа-клавиши клавиатуры. Весит копейки — это тот же сайт.'),
+  ];
+  if (note) children.push(h('p', { class: 'ic-note' }, note));
+  if (steps.length) children.push(h('ol', {}, ...steps.map((s) => h('li', {}, s))));
+  if (deferredPrompt) {
+    children.push(
+      h('button', {
+        class: 'btn primary',
+        onClick: async () => {
+          try {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+          } catch {
+            /* отменено */
+          }
+          deferredPrompt = null;
+          ui.closeSheet();
+        },
+      }, 'Установить')
+    );
+  }
+  return h('div', { class: 'install-card' }, ...children);
+}
+
 function openSettingsSheet() {
   const themeSel = h('select', {},
     h('option', { value: 'dark' }, 'Тёмная'),
@@ -435,6 +523,7 @@ function openSettingsSheet() {
   const importFile = h('input', { type: 'file', accept: '.json,application/json', hidden: true });
 
   const body = h('div', {},
+    buildInstallCard(),
     h('div', { class: 'section-title' }, 'Внешний вид'),
     h('div', { class: 'field' }, h('label', {}, 'Тема'), themeSel),
 
@@ -780,4 +869,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 });
-window.addEventListener('appinstalled', () => ui.toast('Установлено!'));
+window.addEventListener('appinstalled', () => {
+  store.set({ installed: true });
+  ui.toast('Установлено!');
+});

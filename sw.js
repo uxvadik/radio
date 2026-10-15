@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v12';
+const CACHE = 'radio-shell-v14';
 const ASSETS = [
   './',
   './index.html',

@@ -8,6 +8,7 @@ const DEFAULTS = {
   metadata: true,
   metadataInterval: 15, // сек
   noise: true,          // шумы радио при буферизации
+  installed: false,     // отмечено ли, что приложение установлено
   proxies: [
     'https://api.allorigins.win/raw?url={url}',
     'https://api.codetabs.com/v1/proxy?quest={url}',
