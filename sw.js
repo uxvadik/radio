@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v15';
+const CACHE = 'radio-shell-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -67,13 +67,14 @@ self.addEventListener('fetch', (event) => {
   if (/\.wav$/i.test(url.pathname)) return; // сэмплы шумов не кэшируем
 
   if (req.mode === 'navigate') {
-    event.respondWith(fetch(req).catch(() => caches.match('./index.html')));
+    // no-store: обходим и SW-кэш, и HTTP-кэш браузера — всегда свежий HTML
+    event.respondWith(fetch(req, { cache: 'no-store' }).catch(() => caches.match('./index.html')));
     return;
   }
 
-  // network-first: всегда свежий код, кэш — только запасной вариант офлайн.
+  // network-first с обходом HTTP-кэша; кэш SW — только запасной вариант офлайн.
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-store' })
       .then((res) => {
         if (res && res.ok) {
           const copy = res.clone();

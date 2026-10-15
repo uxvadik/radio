@@ -596,7 +596,7 @@ function openSettingsSheet() {
 }
 
 async function forceUpdate() {
-  ui.toast('Обновляю…', 1500);
+  ui.toast('Обновляю…', 2000);
   try {
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
@@ -606,6 +606,23 @@ async function forceUpdate() {
       const keys = await caches.keys();
       await Promise.all(keys.map((k) => caches.delete(k)));
     }
+    // обновляем HTTP-кэш браузера: тянем файлы в обход кэша (GitHub Pages кэширует JS)
+    const bust = [
+      './',
+      './index.html',
+      './css/app.css',
+      './js/app.js',
+      './js/store.js',
+      './js/ui.js',
+      './js/player.js',
+      './js/radio.js',
+      './js/m3u.js',
+      './js/metadata.js',
+      './js/noise.js',
+      './manifest.webmanifest',
+      './sw.js',
+    ];
+    await Promise.all(bust.map((u) => fetch(u, { cache: 'reload' }).catch(() => {})));
   } catch (e) {
     console.warn('Не удалось сбросить кэш', e);
   }
