@@ -1,0 +1,207 @@
+#EXTM3U
+# AI Radio — станции, где музыка сгенерирована ИИ.
+# Секция 1: 100% AI-музыка, без AI-диджеев.
+
+#EXTINF:-1,DigitalDreams FM (AI music, 24/7)
+https://radio.digitaldreamsfm.com/stream
+#EXTINF:-1,OnlyAI.fm (AI music)
+https://stream.onlyai.fm/api/radio/stream?format=live&playerSession=1
+#EXTINF:-1,Hit Radio AI (AI Pop/EDM)
+https://cast6.asurahosting.com/proxy/kool_fm/stream
+#EXTINF:-1,МУЗ-ИИ (AI mix)
+https://radio.muz-ii.ru/listen/mix/radio.mp3
+#EXTINF:-1,Радио Нейро Хит (AI music)
+https://a9.radioheart.ru:8011/RH84021
+#EXTINF:-1,Siberski AI Radio (AI music)
+https://myradio24.org/siberski
+#EXTINF:-1,Meder FM (AI music)
+https://myradio24.org/7934
+
+# Music Radio AI — сеть AI-каналов (AzuraCast)
+#EXTINF:-1,Music Radio AI (mix)
+https://radio.musicradio.ai/listen/musicradio.ai/radio.mp3
+#EXTINF:-1,Music Radio AI — Chillout
+https://radio.musicradio.ai/listen/music_radio_chillout/radio.mp3
+#EXTINF:-1,Music Radio AI — Country
+https://radio.musicradio.ai/listen/music_radio_country/radio.mp3
+#EXTINF:-1,Music Radio AI — Jazz
+https://radio.musicradio.ai/listen/music_radio_jazz/radio.mp3
+#EXTINF:-1,Music Radio AI — UK Garage
+https://radio.musicradio.ai/listen/music_radio_uk_garage/radio.mp3
+#EXTINF:-1,Music Radio AI — Rock
+https://radio.musicradio.ai/listen/music_radio_rock/radio.mp3
+#EXTINF:-1,Music Radio AI — R&B & Soul
+https://radio.musicradio.ai/listen/music_radio_rb__soul/radio.mp3
+#EXTINF:-1,Music Radio AI — Hip Hop
+https://radio.musicradio.ai/listen/music_radio_hip_hop/radio.mp3
+#EXTINF:-1,Music Radio AI — Classical
+https://radio.musicradio.ai/listen/music_radio_classical/radio.mp3
+#EXTINF:-1,Music Radio AI — Blues
+https://radio.musicradio.ai/listen/music_radio_blues/radio.mp3
+#EXTINF:-1,Music Radio AI — Lounge
+https://radio.musicradio.ai/listen/music_radio_lounge/radio.mp3
+#EXTINF:-1,Music Radio AI — Fitness
+https://radio.musicradio.ai/listen/music_radio_fitness/radio.mp3
+#EXTINF:-1,Music Radio AI — K-Pop
+https://radio.musicradio.ai/listen/music_radio_k-pop/radio.mp3
+#EXTINF:-1,Music Radio AI — Dance
+https://radio.musicradio.ai/listen/music_radio_dance/radio.mp3
+#EXTINF:-1,Music Radio AI — Celtic
+https://radio.musicradio.ai/listen/music_radio_celtic/radio.mp3
+#EXTINF:-1,Music Radio AI — Reggae
+https://radio.musicradio.ai/listen/music_radio_reggae/radio.mp3
+#EXTINF:-1,Music Radio AI — Zen
+https://radio.musicradio.ai/listen/music_radio_zen/radio.mp3
+#EXTINF:-1,Music Radio AI — Disco
+https://radio.musicradio.ai/listen/music_radio_disco/radio.mp3
+#EXTINF:-1,Music Radio AI — Grunge Rock
+https://radio.musicradio.ai/listen/music_radio_grunge_rock/radio.mp3
+#EXTINF:-1,Music Radio AI — Latin
+https://radio.musicradio.ai/listen/music_radio_latin/radio.mp3
+#EXTINF:-1,Music Radio AI — Chillout Deep House
+https://radio.musicradio.ai/listen/music_radio_chillout_deep_house/radio.mp3
+#EXTINF:-1,Music Radio AI — Drum & Bass
+https://radio.musicradio.ai/listen/music_radio_drum__bass/radio.mp3
+#EXTINF:-1,Music Radio AI — Lo-Fi
+https://radio.musicradio.ai/listen/music_radio_lo-fi/radio.mp3
+#EXTINF:-1,Music Radio AI — Pop
+https://radio.musicradio.ai/listen/music_radio_pop/radio.mp3
+#EXTINF:-1,Music Radio AI — Metal
+https://radio.musicradio.ai/listen/music_radio_metal/radio.mp3
+#EXTINF:-1,Music Radio AI — Indie Alternative
+https://radio.musicradio.ai/listen/music_radio_indie_alternative/radio.mp3
+#EXTINF:-1,Music Radio AI — Afrobeats
+https://radio.musicradio.ai/listen/music_radio_afrobeats/radio.mp3
+#EXTINF:-1,Music Radio AI — Synthwave
+https://radio.musicradio.ai/listen/music_radio_synthwave/radio.mp3
+#EXTINF:-1,Music Radio AI — Focus Study
+https://radio.musicradio.ai/listen/music_radio_focus_study/radio.mp3
+#EXTINF:-1,Music Radio AI — Sleep
+https://radio.musicradio.ai/listen/music_radio_sleep/radio.mp3
+#EXTINF:-1,Music Radio AI — Techno
+https://radio.musicradio.ai/listen/music_radio_techno/radio.mp3
+#EXTINF:-1,Music Radio AI — Funk
+https://radio.musicradio.ai/listen/music_radio_funk/radio.mp3
+#EXTINF:-1,Music Radio AI — Gospel
+https://radio.musicradio.ai/listen/music_radio_gospel/radio.mp3
+#EXTINF:-1,Music Radio AI — Ambient
+https://radio.musicradio.ai/listen/music_radio_ambient/radio.mp3
+#EXTINF:-1,Music Radio AI — French Chanson
+https://radio.musicradio.ai/listen/music_radio_french_chanson/radio.mp3
+#EXTINF:-1,Music Radio AI — Acoustic
+https://radio.musicradio.ai/listen/music_radio_acoustic/radio.mp3
+#EXTINF:-1,Music Radio AI — Acid Jazz
+https://radio.musicradio.ai/listen/music_radio_acid_jazz/radio.mp3
+#EXTINF:-1,Music Radio AI — House
+https://radio.musicradio.ai/listen/music_radio_house/radio.mp3
+#EXTINF:-1,Music Radio AI — Funky House
+https://radio.musicradio.ai/listen/music_radio_funky_house/radio.mp3
+
+# DATASET RADIO — нейросетевое радио, 50+ жанровых потоков (AAC)
+#EXTINF:-1,DATASET RADIO (main)
+https://region-ru4.tunio.ai/datasetradio.aac
+#EXTINF:-1,DATASET RADIO — Amapiano
+https://region-ru2.tunio.ai/amapiano.aac
+#EXTINF:-1,DATASET RADIO — Apocalyptic
+https://region-ru2.tunio.ai/apocaliptic.aac
+#EXTINF:-1,DATASET RADIO — Arabic Lounge
+https://region-ru2.tunio.ai/arabic-lounge.aac
+#EXTINF:-1,DATASET RADIO — Blues
+https://region-ru2.tunio.ai/bluz.aac
+#EXTINF:-1,DATASET RADIO — Breakbeat
+https://region-ru2.tunio.ai/break.aac
+#EXTINF:-1,DATASET RADIO — Chill
+https://region-ru2.tunio.ai/chill.aac
+#EXTINF:-1,DATASET RADIO — Chill Techno
+https://region-ru2.tunio.ai/chilltechno.aac
+#EXTINF:-1,DATASET RADIO — Chiptune
+https://region-ru2.tunio.ai/chiptune.aac
+#EXTINF:-1,DATASET RADIO — Country
+https://region-ru2.tunio.ai/country.aac
+#EXTINF:-1,DATASET RADIO — Cyberpunk
+https://region-ru2.tunio.ai/cyberpunk.aac
+#EXTINF:-1,DATASET RADIO — Dancehall
+https://region-ru2.tunio.ai/dancehall.aac
+#EXTINF:-1,DATASET RADIO — Dance Pop
+https://region-ru2.tunio.ai/dancepop.aac
+#EXTINF:-1,DATASET RADIO — Dark Synth
+https://region-ru2.tunio.ai/darksint.aac
+#EXTINF:-1,DATASET RADIO — Downtempo
+https://region-ru2.tunio.ai/downtempo.aac
+#EXTINF:-1,DATASET RADIO — Dreamwave
+https://region-ru2.tunio.ai/dreamwave.aac
+#EXTINF:-1,DATASET RADIO — Drum & Bass
+https://region-ru2.tunio.ai/drumbass.aac
+#EXTINF:-1,DATASET RADIO — Dubstep
+https://region-ru2.tunio.ai/dubstep.aac
+#EXTINF:-1,DATASET RADIO — EDM
+https://region-ru2.tunio.ai/edm.aac
+#EXTINF:-1,DATASET RADIO — Ethnic Ambient
+https://region-ru2.tunio.ai/ethnic-ambient.aac
+#EXTINF:-1,DATASET RADIO — Experimental
+https://region-ru2.tunio.ai/experimental.aac
+#EXTINF:-1,DATASET RADIO — Folk
+https://region-ru2.tunio.ai/folk.aac
+#EXTINF:-1,DATASET RADIO — Funk
+https://region-ru2.tunio.ai/funk.aac
+#EXTINF:-1,DATASET RADIO — Future Bass
+https://region-ru2.tunio.ai/future-buss.aac
+#EXTINF:-1,DATASET RADIO — Future Funk
+https://region-ru2.tunio.ai/futurefunk.aac
+#EXTINF:-1,DATASET RADIO — Grime
+https://region-ru2.tunio.ai/grime.aac
+#EXTINF:-1,DATASET RADIO — Hard Groove
+https://region-ru2.tunio.ai/hardgroove.aac
+#EXTINF:-1,DATASET RADIO — Hip-Hop
+https://region-ru2.tunio.ai/hop.aac
+#EXTINF:-1,DATASET RADIO — Indie
+https://region-ru2.tunio.ai/indi.aac
+#EXTINF:-1,DATASET RADIO — Jazz
+https://region-ru2.tunio.ai/jaz.aac
+#EXTINF:-1,DATASET RADIO — Lo-Fi
+https://region-ru2.tunio.ai/lo-fi.aac
+#EXTINF:-1,DATASET RADIO — Lounge
+https://region-ru2.tunio.ai/lounge.aac
+#EXTINF:-1,DATASET RADIO — Meditative
+https://region-ru2.tunio.ai/meditative.aac
+#EXTINF:-1,DATASET RADIO — Neurofunk
+https://region-ru2.tunio.ai/neurofunk.aac
+#EXTINF:-1,DATASET RADIO — Phonk
+https://region-ru2.tunio.ai/phonk.aac
+#EXTINF:-1,DATASET RADIO — Pop
+https://region-ru2.tunio.ai/pop.aac
+#EXTINF:-1,DATASET RADIO — Pop (SAP)
+https://region-ru2.tunio.ai/popsa.aac
+#EXTINF:-1,DATASET RADIO — Progressive
+https://region-ru2.tunio.ai/progressive.aac
+#EXTINF:-1,DATASET RADIO — Rad
+https://region-ru2.tunio.ai/rad.aac
+#EXTINF:-1,DATASET RADIO — Rave Techno
+https://region-ru2.tunio.ai/ravetechno.aac
+#EXTINF:-1,DATASET RADIO — R&B
+https://region-ru2.tunio.ai/rbstation.aac
+#EXTINF:-1,DATASET RADIO — Reggae
+https://region-ru2.tunio.ai/reggae.aac
+#EXTINF:-1,DATASET RADIO — SAP Data
+https://region-ru2.tunio.ai/sapdata.aac
+#EXTINF:-1,DATASET RADIO — SFO Music
+https://region-ru2.tunio.ai/sfo-music.aac
+#EXTINF:-1,DATASET RADIO — Soul
+https://region-ru2.tunio.ai/soul.aac
+#EXTINF:-1,DATASET RADIO — Super Data
+https://region-ru2.tunio.ai/superdata.aac
+#EXTINF:-1,DATASET RADIO — Techno
+https://region-ru2.tunio.ai/techno.aac
+#EXTINF:-1,DATASET RADIO — Trap
+https://region-ru2.tunio.ai/trap.aac
+#EXTINF:-1,DATASET RADIO — Tropical House
+https://region-ru2.tunio.ai/tropical-house.aac
+#EXTINF:-1,DATASET RADIO — Workout
+https://region-ru2.tunio.ai/workoutio.aac
+
+# Секция 2: музыка 100% AI, но есть AI-диджей/новости (единого потока нет — играются потреково).
+# AI WAVE FM (aiwavefm.ru)  — https://aiwavefm.ru/api/get_tracks.php
+# AIRFM (airfm.net)         — https://airfm.net/tracks.json
+# airadio.dev               — https://airadio.dev/api/library/{genre}/{subgenre}
+# Genesia (genesiai.ru)     — синхронный эфир по mp3-файлам
+# AetherWave                — https://aetherwavestudio.com/api/radio/stations/{shareCode}/now-playing

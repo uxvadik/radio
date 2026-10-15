@@ -77,6 +77,7 @@ export const BUNDLED = [
   { id: 'b-covera', name: 'Каверы', url: './playlists/covera.m3u' },
   { id: 'b-deephouse', name: 'Deep House', url: './playlists/deephouse.m3u' },
   { id: 'b-jazz', name: 'Jazz', url: './playlists/jazz.m3u' },
+  { id: 'b-airadio', name: 'AI', url: './playlists/airadio.m3u' },
 ];
 
 // Плейлисты GTA — показываются в самом конце списка категорий.
