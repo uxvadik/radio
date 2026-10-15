@@ -4,7 +4,7 @@ import { Player } from './player.js';
 import { resolveNowPlaying, fetchText } from './metadata.js';
 import { NoiseEngine } from './noise.js';
 import { parsePlaylist, makeStation } from './m3u.js';
-import { searchStations, PRESETS, BUNDLED } from './radio.js';
+import { searchStations, PRESETS, BUNDLED, GTA } from './radio.js';
 import { ui, h, $ } from './ui.js';
 
 const player = new Player($('#audio'));
@@ -79,6 +79,7 @@ function allPlaylists() {
   if (store.get('recent').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
   list.push(...BUNDLED.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
   list.push(...PRESETS.map((p) => ({ id: p.id, name: p.name, kind: 'preset', query: p.query })));
+  list.push(...GTA.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
   list.push(...customPlaylists().map((p) => ({ id: p.id, name: p.name, kind: 'm3u', removable: p.id !== 'mine' })));
   return list;
 }
@@ -106,7 +107,7 @@ async function selectPlaylist(id, { silent } = {}) {
     return;
   }
 
-  const bundled = BUNDLED.find((b) => b.id === id);
+  const bundled = [...BUNDLED, ...GTA].find((b) => b.id === id);
   if (bundled) {
     ui.setLoading();
     try {

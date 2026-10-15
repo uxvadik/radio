@@ -77,9 +77,13 @@ export const BUNDLED = [
   { id: 'b-covera', name: 'Каверы', url: './playlists/covera.m3u' },
   { id: 'b-deephouse', name: 'Deep House', url: './playlists/deephouse.m3u' },
   { id: 'b-jazz', name: 'Jazz', url: './playlists/jazz.m3u' },
+];
+
+// Плейлисты GTA — показываются в самом конце списка категорий.
+export const GTA = [
   { id: 'gta-3', name: 'GTA III', url: './playlists/gta-3.m3u' },
-  { id: 'gta-vc', name: 'GTA Vice City', url: './playlists/gta-vc.m3u' },
-  { id: 'gta-sa', name: 'GTA San Andreas', url: './playlists/gta-sa.m3u' },
+  { id: 'gta-vc', name: 'GTA VC', url: './playlists/gta-vc.m3u' },
+  { id: 'gta-sa', name: 'GTA SA', url: './playlists/gta-sa.m3u' },
   { id: 'gta-4', name: 'GTA IV', url: './playlists/gta-4.m3u' },
   { id: 'gta-lcs', name: 'GTA LCS', url: './playlists/gta-lcs.m3u' },
   { id: 'gta-vcs', name: 'GTA VCS', url: './playlists/gta-vcs.m3u' },
