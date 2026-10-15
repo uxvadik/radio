@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v11';
+const CACHE = 'radio-shell-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -70,18 +70,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // network-first: всегда свежий код, кэш — только запасной вариант офлайн.
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const network = fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || network;
-    })
+    fetch(req)
+      .then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
 });

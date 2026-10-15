@@ -10,10 +10,10 @@ import { ui, h, $ } from './ui.js';
 const player = new Player($('#audio'));
 
 const noise = new NoiseEngine([
-  './sample/2.mp3',
-  './sample/3.mp3',
-  './sample/4.mp3',
-  './sample/1.mp3',
+  { url: './sample/2.mp3', weight: 1 },
+  { url: './sample/3.mp3', weight: 0.03 }, // «помеха телефона» — очень редко
+  { url: './sample/4.mp3', weight: 1 },
+  { url: './sample/1.mp3', weight: 1 },
 ]);
 noise.enabled = store.get('noise');
 
