@@ -1,0 +1,53 @@
+#EXTM3U
+# NFS — музыка Need for Speed, гонки, ретро-игры.
+# Только потоки, работающие по HTTPS (иначе браузер блокирует их на защищённой странице).
+
+# Прямо по игре / игровая музыка
+#EXTINF:-1,NFS.onl Radio (музыка Need for Speed)
+https://radio.nfs.onl:8443/stream.ogg
+#EXTINF:-1,World of Gaming
+https://worldofgaming.stream.laut.fm/worldofgaming
+#EXTINF:-1,Gamesboro Radio (VGM 24/7)
+https://radio.gamesboro.org/listen/gamesboro_radio/radio.mp3
+#EXTINF:-1,Gamepad Music
+https://centova.listenon.in/proxy/gamepad/stream
+#EXTINF:-1,RadioSEGA
+https://icecast.radiosega.net/live
+
+# Гоночный вайб (симуляторы/трассы)
+#EXTINF:-1,Nürburgring
+https://nuerburgring.stream.laut.fm/nuerburgring
+#EXTINF:-1,Auto (laut.fm)
+https://auto.stream.laut.fm/auto
+#EXTINF:-1,Simulator Radio
+https://simulator-radio.stream.laut.fm/simulator-radio
+#EXTINF:-1,ETS2 Radio
+https://ets2-radio.stream.laut.fm/ets2-radio
+
+# Underground / Most Wanted (DnB, рок, электро)
+#EXTINF:-1,Bassdrive (Drum & Bass)
+https://chi.bassdrive.co/;
+#EXTINF:-1,Sunshine Live DnB
+https://stream.sunshine-live.de/dnb/mp3-192/stream.sunshine-live.de/
+
+# NFS 2015 / Heat / Unbound (synthwave, electro house)
+#EXTINF:-1,Nightride FM
+https://stream.nightride.fm/nightride.mp3
+#EXTINF:-1,Nightride FM Darksynth
+https://stream.nightride.fm/darksynth.mp3
+#EXTINF:-1,Radio Record Synthwave
+https://radiorecord.hostingradio.ru/synth96.aacp
+#EXTINF:-1,Synthwave Radio
+https://stream.synthwaveradio.eu/listen/synthwaveradio.eu/radio.mp3
+#EXTINF:-1,Technolovers Electro House
+https://stream.technolovers.fm/electro-house
+
+# Asphalt (EDM / big room / electro)
+#EXTINF:-1,Dance Wave!
+https://dancewave.online/dance.mp3
+
+# Ностальгия (Initial D eurobeat, italo 90s)
+#EXTINF:-1,Eurobeat (laut.fm)
+https://eurobeat.stream.laut.fm/eurobeat
+#EXTINF:-1,Fantasy Italo Dance 90s
+https://mscp2.live-streams.nl:8152/italodance
