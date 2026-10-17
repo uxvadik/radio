@@ -17,22 +17,51 @@ const noise = new NoiseEngine([
 ]);
 noise.enabled = store.get('noise');
 
-const NOISE_DELAY = 250; // мс буферизации до включения шума
-let noiseTimer = null;
+const NOISE_DELAY = 400; // мс реальной тишины до включения шума
+let noiseOn = false;
+let silenceTimer = null;
+let prevTime = null;
+let stallMs = 0;
 
 function applyNoiseVolume() {
   noise.setVolume((store.get('muted') ? 0 : store.get('volume')) * 0.4);
 }
-function scheduleNoise() {
-  clearTimeout(noiseTimer);
-  noiseTimer = setTimeout(() => {
-    if (player.loading && !player.audio.paused) noise.start();
-  }, NOISE_DELAY);
-}
-function cancelNoise() {
-  clearTimeout(noiseTimer);
-  noiseTimer = null;
-  noise.stop();
+
+// Шум включаем ТОЛЬКО когда звук реально пропал: следим за currentTime —
+// если он не двигается при «играющем» плеере, значит тишина (буферизация).
+function startSilenceWatch() {
+  if (silenceTimer) return;
+  prevTime = null;
+  stallMs = 0;
+  silenceTimer = setInterval(() => {
+    const a = player.audio;
+    const wantsPlay = !!player.station && !a.paused && !a.ended && !player.error;
+    const t = a.currentTime;
+    const progressed = prevTime === null ? false : t !== prevTime;
+    prevTime = t;
+
+    if (!wantsPlay || !store.get('noise')) {
+      stallMs = 0;
+      if (noiseOn) {
+        noise.stop();
+        noiseOn = false;
+      }
+      return;
+    }
+    if (progressed) {
+      stallMs = 0;
+      if (noiseOn) {
+        noise.stop();
+        noiseOn = false;
+      }
+    } else {
+      stallMs += 250;
+      if (!noiseOn && stallMs >= NOISE_DELAY) {
+        noiseOn = true;
+        noise.start();
+      }
+    }
+  }, 250);
 }
 
 let currentStations = [];
@@ -267,10 +296,6 @@ player.on('state', (st) => {
   else if (st.playing) ui.setStatus('в эфире');
   renderList();
   if (st.playing) refreshNowPlaying();
-
-  const wantsPlay = !!st.station && !player.audio.paused;
-  if (st.loading && wantsPlay && store.get('noise')) scheduleNoise();
-  else cancelNoise();
 });
 
 player.on('error', ({ error }) => ui.toast(error));
@@ -815,6 +840,7 @@ function init() {
   ui.setVolumeBar(store.get('muted') ? 0 : vol);
   ui.setMuted(store.get('muted'));
   applyNoiseVolume();
+  startSilenceWatch();
 
   const last = store.get('lastStation');
   ui.setPlayerInfo({
