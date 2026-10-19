@@ -7,7 +7,8 @@ const DEFAULTS = {
   muted: false,
   metadata: true,
   metadataInterval: 15, // сек
-  noise: true,          // шумы радио при буферизации
+  noise: false,         // шумы радио при буферизации (по умолчанию выключены)
+  noiseOffDefault: true, // одноразовая миграция: выключить шумы у старых настроек
   installed: false,     // отмечено ли, что приложение установлено
   proxies: [
     'https://api.allorigins.win/raw?url={url}',
@@ -27,7 +28,19 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULTS);
     const parsed = JSON.parse(raw);
-    return { ...structuredClone(DEFAULTS), ...parsed };
+    // для уже сохранённых настроек один раз принудительно выключаем шумы
+    const firstRun = parsed.noiseOffDefault !== true;
+    const merged = { ...structuredClone(DEFAULTS), ...parsed, noiseOffDefault: true };
+    if (firstRun) {
+      merged.noise = false;
+      // сразу фиксируем в localStorage, чтобы миграция не зависела от других записей
+      try {
+        localStorage.setItem(KEY, JSON.stringify(merged));
+      } catch {
+        /* ignore */
+      }
+    }
+    return merged;
   } catch {
     return structuredClone(DEFAULTS);
   }

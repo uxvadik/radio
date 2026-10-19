@@ -540,6 +540,11 @@ function openSettingsSheet() {
 
   const metaChk = h('input', { type: 'checkbox', checked: store.get('metadata') });
   const noiseChk = h('input', { type: 'checkbox', checked: store.get('noise') });
+  noiseChk.addEventListener('change', () => {
+    store.set({ noise: noiseChk.checked });
+    noise.enabled = noiseChk.checked;
+    if (!noiseChk.checked) noise.stop();
+  });
   const interval = h('input', { type: 'number', min: '5', max: '120', value: store.get('metadataInterval') });
   const proxies = h('textarea', { class: 'proxy-area' });
   proxies.value = store.get('proxies').join('\n');
@@ -561,6 +566,12 @@ function openSettingsSheet() {
     h('div', { class: 'field' }, h('label', {}, 'CORS-прокси (по одному в строке, {url} — место ссылки)'), proxies,
       h('div', { class: 'hint' }, 'Прокси нужны, т.к. серверы радио не отдают CORS-заголовки. Если один не работает — попробуй другой.'))
 ,
+    h('div', { class: 'section-title' }, 'Звук'),
+    h('label', { class: 'switch' },
+      h('span', {}, h('span', { class: 'sw-txt' }, 'Шумы при буферизации'), h('div', { class: 'sw-sub' }, 'Радиопомехи вместо тишины, пока грузится поток')),
+      noiseChk
+    ),
+
     h('button', { class: 'btn primary', onClick: () => {
       const list = proxies.value.split('\n').map((s) => s.trim()).filter(Boolean);
       store.set({
@@ -577,12 +588,6 @@ function openSettingsSheet() {
       ui.toast('Настройки сохранены');
       ui.closeSheet();
     } }, 'Сохранить'),
-
-    h('div', { class: 'section-title' }, 'Звук'),
-    h('label', { class: 'switch' },
-      h('span', {}, h('span', { class: 'sw-txt' }, 'Шумы при буферизации'), h('div', { class: 'sw-sub' }, 'Радиопомехи вместо тишины, пока грузится поток')),
-      noiseChk
-    ),
 
     h('div', { class: 'section-title' }, 'Данные'),
     h('div', { class: 'btn-row' },
