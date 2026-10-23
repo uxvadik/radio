@@ -30,8 +30,10 @@ const DEFAULTS = {
     'https://corsproxy.io/?url={url}',
   ],
   customPlaylists: [], // { id, name, url, stations: [...] }
-  favorites: [],       // станции/каналы
-  recent: [],          // станции/каналы
+  favorites: [],       // избранное РАДИО
+  recent: [],          // недавние РАДИО
+  favoritesTv: [],     // избранное ТВ
+  recentTv: [],        // недавние ТВ
 };
 
 function load() {
@@ -121,31 +123,48 @@ export const store = {
   },
 };
 
-// --- Избранное -------------------------------------------------------------
+// --- Избранное (своё для радио и ТВ) ---------------------------------------
+
+function favKey(mode) {
+  return mode === 'tv' ? 'favoritesTv' : 'favorites';
+}
 
 export const favorites = {
-  has(item) {
-    return state.favorites.some((s) => s.id === item.id || s.url === item.url);
+  list(mode) {
+    return state[favKey(mode)] || [];
   },
-  toggle(item) {
-    const exists = favorites.has(item);
+  has(item, mode) {
+    return favorites.list(mode).some((s) => s.id === item.id || s.url === item.url);
+  },
+  toggle(item, mode) {
+    const exists = favorites.has(item, mode);
+    const key = favKey(mode);
     const next = exists
-      ? state.favorites.filter((s) => s.id !== item.id && s.url !== item.url)
-      : [item, ...state.favorites];
-    store.set({ favorites: next });
+      ? favorites.list(mode).filter((s) => s.id !== item.id && s.url !== item.url)
+      : [item, ...favorites.list(mode)];
+    store.set({ [key]: next });
     return !exists;
   },
-  remove(item) {
-    store.set({ favorites: state.favorites.filter((s) => s.id !== item.id && s.url !== item.url) });
+  remove(item, mode) {
+    const key = favKey(mode);
+    store.set({ [key]: favorites.list(mode).filter((s) => s.id !== item.id && s.url !== item.url) });
   },
 };
 
-// --- Недавние --------------------------------------------------------------
+// --- Недавние (своё для радио и ТВ) ----------------------------------------
+
+function recentKey(mode) {
+  return mode === 'tv' ? 'recentTv' : 'recent';
+}
 
 export const recent = {
-  push(item) {
-    const next = [item, ...state.recent.filter((s) => s.url !== item.url)].slice(0, 30);
-    store.set({ recent: next });
+  list(mode) {
+    return state[recentKey(mode)] || [];
+  },
+  push(item, mode) {
+    const key = recentKey(mode);
+    const next = [item, ...recent.list(mode).filter((s) => s.url !== item.url)].slice(0, 30);
+    store.set({ [key]: next });
   },
 };
 

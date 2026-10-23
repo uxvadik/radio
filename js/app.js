@@ -115,7 +115,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
 // ---------------------------------------------------------------- playlists
 function radioPlaylists() {
   const list = [{ id: 'fav', name: 'Избранное', kind: 'fav' }];
-  if (store.get('recent').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
+  if (recent.list('radio').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
   list.push(...RADIO_BUNDLED.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
   list.push(...PRESETS.map((p) => ({ id: p.id, name: p.name, kind: 'preset', query: p.query })));
   list.push(...GTA.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
@@ -128,7 +128,7 @@ function tvPlaylists() {
   const comedy = TV_BUNDLED.filter((b) => b.id === 'tv-comedy' || b.id === 'tv-archive');
   const rest = TV_BUNDLED.filter((b) => !edu.includes(b) && !comedy.includes(b));
   const list = [{ id: 'fav', name: 'Избранное', kind: 'fav' }];
-  if (store.get('recent').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
+  if (recent.list('tv').length) list.push({ id: 'recent', name: 'Недавние', kind: 'recent' });
   list.push(...edu.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
   list.push(...comedy.map((b) => ({ id: b.id, name: b.name, kind: 'bundled' })));
   list.push({ id: 'tv-all', name: 'Все', kind: 'all' });
@@ -187,14 +187,14 @@ async function selectPlaylist(id, { silent } = {}) {
   renderTabs();
 
   if (id === 'fav') {
-    currentChannels = expand(store.get('favorites'));
+    currentChannels = expand(favorites.list(mode));
     renderList();
     ui.setStatus('избранное');
     if (!currentChannels.length) ui.setMessage('В избранном пока пусто.<br>Отметь звёздочкой.');
     return;
   }
   if (id === 'recent') {
-    currentChannels = expand(store.get('recent'));
+    currentChannels = expand(recent.list(mode));
     renderList();
     ui.setStatus('недавние');
     if (!currentChannels.length) ui.setMessage('Здесь появятся то, что ты слушал и смотрел.');
@@ -260,7 +260,7 @@ async function selectPlaylist(id, { silent } = {}) {
 // -------------------------------------------------------------------- список
 function renderList() {
   const set = new Set();
-  store.get('favorites').forEach((c) => {
+  favorites.list(mode).forEach((c) => {
     set.add(c.id);
     set.add(c.url);
   });
@@ -281,7 +281,7 @@ function pickChannel(i) {
     else player.toggle();
     return;
   }
-  recent.push(c);
+  recent.push(c, mode);
   renderTabs();
   player.playStation(c, currentChannels, i);
   updateFavButton();
@@ -452,7 +452,7 @@ async function refreshNowPlaying() {
 
 // ------------------------------------------------------------- избранное
 function updateFavButton() {
-  ui.setFav(!!(player.channel && favorites.has(player.channel)));
+  ui.setFav(!!(player.channel && favorites.has(player.channel, mode)));
 }
 
 // ------------------------------------------------------ картинка в картинке
@@ -960,7 +960,7 @@ function openStationSheet(index) {
     placeholder: mode === 'radio' ? 'напр. https://host:8000/status-json.xsl' : 'https://… (необязательно)',
     inputmode: 'url',
   });
-  const favLabel = favorites.has(c) ? 'Убрать из избранного' : 'В избранное';
+  const favLabel = favorites.has(c, mode) ? 'Убрать из избранного' : 'В избранное';
 
   const body = h('div', {},
     h('div', { class: 'field' }, h('label', {}, 'Название'), nameInput),
@@ -972,7 +972,7 @@ function openStationSheet(index) {
           h('div', { class: 'hint' }, 'Для ТВ это необязательно.')),
 
     h('button', { class: 'btn', onClick: () => {
-      const on = favorites.toggle({ ...c, name: nameInput.value.trim() || c.name });
+      const on = favorites.toggle({ ...c, name: nameInput.value.trim() || c.name }, mode);
       updateFavButton();
       renderList();
       ui.toast(on ? 'Добавлено в избранное' : 'Убрано из избранного');
@@ -984,13 +984,14 @@ function openStationSheet(index) {
         const name = nameInput.value.trim() || c.name;
         const url = urlInput.value.trim() || c.url;
         const metaUrl = metaInput.value.trim();
+        const fk = mode === 'tv' ? 'favoritesTv' : 'favorites';
         store.update((st) => ({
           metaUrls: { ...st.metaUrls, [c.id]: metaUrl },
           customPlaylists: st.customPlaylists.map((p) => ({
             ...p,
             stations: (p.stations || []).map((x) => (x.id === c.id ? { ...x, name, url } : x)),
           })),
-          favorites: st.favorites.map((x) => (x.id === c.id ? { ...x, name, url } : x)),
+          [fk]: (st[fk] || []).map((x) => (x.id === c.id ? { ...x, name, url } : x)),
         }));
         const urlChanged = url !== c.url;
         if (player.channel && player.channel.id === c.id) {
@@ -1006,12 +1007,13 @@ function openStationSheet(index) {
 
       isCustom
         ? h('button', { class: 'btn danger', onClick: () => {
+            const fk = mode === 'tv' ? 'favoritesTv' : 'favorites';
             store.update((st) => ({
               customPlaylists: st.customPlaylists.map((p) => ({
                 ...p,
                 stations: (p.stations || []).filter((x) => x.id !== c.id),
               })),
-              favorites: st.favorites.filter((x) => x.id !== c.id),
+              [fk]: (st[fk] || []).filter((x) => x.id !== c.id),
             }));
             currentChannels = currentChannels.filter((x) => x.id !== c.id);
             if (player.channel && player.channel.id === c.id) player.stop();
@@ -1105,7 +1107,7 @@ function bindTopbar() {
   });
   $('#btn-fav').addEventListener('click', () => {
     if (!player.channel) return ui.toast('Сначала включи');
-    const added = favorites.toggle(player.channel);
+    const added = favorites.toggle(player.channel, mode);
     updateFavButton();
     renderTabs();
     renderList();
