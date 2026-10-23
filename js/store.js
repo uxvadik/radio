@@ -5,22 +5,33 @@ const DEFAULTS = {
   theme: 'dark', // dark | light | auto
   volume: 0.85,
   muted: false,
+  installed: false,
+
+  // режим: radio | tv
+  mode: 'radio',
+  lastStation: null,
+  lastChannel: null,
+  activePlaylistId: 'b-altrock',
+  activePlaylistRadio: 'b-altrock',
+  activePlaylistTv: 'tv-edu',
+
+  // радио
   metadata: true,
   metadataInterval: 15, // сек
-  noise: false,         // шумы радио при буферизации (по умолчанию выключены)
-  noiseOffDefault: true, // одноразовая миграция: выключить шумы у старых настроек
-  installed: false,     // отмечено ли, что приложение установлено
+  noise: false,          // шумы радио (по умолчанию выключены)
+  noiseOffDefault: true, // миграция: выключить шумы у старых настроек
+  metaUrls: {},          // stationId -> url метаданных
+
+  // общее
   proxies: [
+    'https://proxy.corsfix.com/?url={url}',
     'https://api.allorigins.win/raw?url={url}',
     'https://api.codetabs.com/v1/proxy?quest={url}',
     'https://corsproxy.io/?url={url}',
   ],
   customPlaylists: [], // { id, name, url, stations: [...] }
-  favorites: [],       // станции
-  recent: [],          // станции
-  lastStation: null,
-  activePlaylistId: 'b-altrock',
-  metaUrls: {},        // stationId -> url метаданных (переопределение)
+  favorites: [],       // станции/каналы
+  recent: [],          // станции/каналы
 };
 
 function load() {
@@ -28,18 +39,31 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULTS);
     const parsed = JSON.parse(raw);
-    // для уже сохранённых настроек один раз принудительно выключаем шумы
-    const firstRun = parsed.noiseOffDefault !== true;
-    const merged = { ...structuredClone(DEFAULTS), ...parsed, noiseOffDefault: true };
-    if (firstRun) {
+    const merged = { ...structuredClone(DEFAULTS), ...parsed };
+
+    // одноразово выключаем шумы у уже сохранённых настроек
+    if (parsed.noiseOffDefault !== true) {
       merged.noise = false;
-      // сразу фиксируем в localStorage, чтобы миграция не зависела от других записей
+      merged.noiseOffDefault = true;
       try {
         localStorage.setItem(KEY, JSON.stringify(merged));
       } catch {
         /* ignore */
       }
     }
+
+    // corsfix нужен для ТВ (Rutube) — держим первым
+    if (!Array.isArray(merged.proxies)) merged.proxies = [];
+    if (!merged.proxies.some((p) => typeof p === 'string' && p.includes('corsfix.com'))) {
+      merged.proxies.unshift('https://proxy.corsfix.com/?url={url}');
+    }
+
+    // для старых радио-настроек подхватываем активный плейлист
+    if (parsed.activePlaylistRadio === undefined) {
+      merged.activePlaylistRadio = parsed.activePlaylistId || 'b-altrock';
+    }
+    if (merged.mode !== 'tv' && merged.mode !== 'radio') merged.mode = 'radio';
+
     return merged;
   } catch {
     return structuredClone(DEFAULTS);
@@ -100,27 +124,27 @@ export const store = {
 // --- Избранное -------------------------------------------------------------
 
 export const favorites = {
-  has(station) {
-    return state.favorites.some((s) => s.id === station.id || s.url === station.url);
+  has(item) {
+    return state.favorites.some((s) => s.id === item.id || s.url === item.url);
   },
-  toggle(station) {
-    const exists = favorites.has(station);
+  toggle(item) {
+    const exists = favorites.has(item);
     const next = exists
-      ? state.favorites.filter((s) => s.id !== station.id && s.url !== station.url)
-      : [station, ...state.favorites];
+      ? state.favorites.filter((s) => s.id !== item.id && s.url !== item.url)
+      : [item, ...state.favorites];
     store.set({ favorites: next });
     return !exists;
   },
-  remove(station) {
-    store.set({ favorites: state.favorites.filter((s) => s.id !== station.id && s.url !== station.url) });
+  remove(item) {
+    store.set({ favorites: state.favorites.filter((s) => s.id !== item.id && s.url !== item.url) });
   },
 };
 
 // --- Недавние --------------------------------------------------------------
 
 export const recent = {
-  push(station) {
-    const next = [station, ...state.recent.filter((s) => s.url !== station.url)].slice(0, 30);
+  push(item) {
+    const next = [item, ...state.recent.filter((s) => s.url !== item.url)].slice(0, 30);
     store.set({ recent: next });
   },
 };

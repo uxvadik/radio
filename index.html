@@ -9,9 +9,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Radio" />
-  <meta name="description" content="Лёгкий потоковый радио-плеер для телефона. M3U-плейлисты, тёмная и светлая темы, без лишнего." />
-  <title>RADIO — потоковый плеер</title>
+  <meta name="apple-mobile-web-app-title" content="RADIO / TV" />
+  <meta name="description" content="Потоковый плеер RADIO / TV: радиостанции, GTA, AI, NFS и открытые ТВ-каналы. Тёмная и светлая темы." />
+  <title>RADIO / TV — потоковый плеер</title>
 
   <link rel="manifest" href="./manifest.webmanifest" />
 
@@ -19,43 +19,74 @@
   <link rel="icon" href="./icons/favicon-16.png" sizes="16x16" type="image/png" />
   <link rel="shortcut icon" href="./icons/favicon.ico" />
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="./css/app.css" />
+  <link rel="stylesheet" href="./css/app.css?v=21" />
 </head>
 <body>
-  <div class="app" id="app">
-    <header class="topbar">
-      <button class="icon-btn" id="btn-theme" type="button" aria-label="Сменить тему" title="Сменить тему">
-        <span class="ico" data-theme-ico></span>
-      </button>
-      <div class="brand">
-        <span class="brand-dot" aria-hidden="true"></span>
-        <span class="brand-name">RADIO</span>
-      </div>
-      <button class="icon-btn" id="btn-settings" type="button" aria-label="Настройки" title="Настройки">
-        <span class="ico ico-gear" aria-hidden="true"></span>
-      </button>
-    </header>
+  <div class="app" id="app" data-mode="radio">
+    <button class="mode-switch" id="mode-switch" type="button" data-mode="radio" aria-label="Переключатель RADIO / TV">
+      <span class="mode-track">
+        <span class="mode-knob" aria-hidden="true"></span>
+        <span class="mode-opt active" data-pos="radio">Radio</span>
+        <span class="mode-opt" data-pos="tv">TV</span>
+      </span>
+    </button>
 
     <section class="player" id="player" aria-label="Плеер">
-      <div class="lcd">
-        <div class="lcd-top">
-          <span class="lcd-station" id="np-station">— выбери станцию —</span>
-          <span class="lcd-badge" id="np-badge">IDLE</span>
+      <!-- ТВ-режим: экран 16:9 -->
+      <div class="screen" id="screen" data-state="idle">
+        <video id="video" playsinline webkit-playsinline preload="none" aria-label="Видео"></video>
+
+        <div class="screen-idle" id="screen-idle">
+          <img class="idle-logo" id="idle-logo" alt="" hidden />
+          <div class="idle-mark" id="idle-mark">ТВ</div>
+          <div class="idle-hint" id="idle-hint">выбери канал</div>
         </div>
-        <div class="lcd-track"><span id="np-track" class="marquee-inner">потоковое радио</span></div>
+
+        <div class="screen-loading" id="screen-loading" hidden>
+          <span class="spinner"></span>
+        </div>
+
+        <div class="screen-osd" id="screen-osd">
+          <div class="osd-top">
+            <span class="lcd-station" id="np-station">— выбери канал —</span>
+            <span class="lcd-badge" id="np-badge">IDLE</span>
+          </div>
+          <div class="osd-bottom">
+            <div class="lcd-track"><span id="np-track" class="marquee-inner">потоковое телевидение</span></div>
+            <span class="osd-res" id="np-res"></span>
+          </div>
+        </div>
+
+        <div class="screen-actions">
+          <button class="icon-btn fs-btn" id="btn-pip" type="button" aria-label="Картинка в картинке" title="Картинка в картинке">
+            <span class="ico ico-pip" aria-hidden="true"></span>
+          </button>
+          <button class="icon-btn fs-btn" id="btn-fs" type="button" aria-label="На весь экран" title="На весь экран">
+            <span class="ico ico-fullscreen" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Радио-режим: VFD-дисплей -->
+      <div class="lcd" id="lcd">
+        <div class="lcd-top">
+          <span class="lcd-station" id="r-station">— выбери станцию —</span>
+          <span class="lcd-badge" id="r-badge">IDLE</span>
+        </div>
+        <div class="lcd-track"><span id="r-track" class="marquee-inner">потоковое радио</span></div>
         <div class="spectrum" id="spectrum" aria-hidden="true">
           <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
         </div>
       </div>
 
       <div class="controls">
-        <button class="icon-btn ctl" id="btn-prev" type="button" aria-label="Предыдущая">
+        <button class="icon-btn ctl" id="btn-prev" type="button" aria-label="Предыдущее">
           <span class="ico ico-prev" aria-hidden="true"></span>
         </button>
         <button class="icon-btn ctl play" id="btn-play" type="button" aria-label="Играть">
           <span class="ico ico-play" data-play-ico aria-hidden="true"></span>
         </button>
-        <button class="icon-btn ctl" id="btn-next" type="button" aria-label="Следующая">
+        <button class="icon-btn ctl" id="btn-next" type="button" aria-label="Следующее">
           <span class="ico ico-next" aria-hidden="true"></span>
         </button>
         <div class="vol">
@@ -72,7 +103,7 @@
 
     <nav class="tabs" id="tabs" aria-label="Плейлисты"></nav>
 
-    <section class="tools">
+    <section class="tools" id="tools">
       <label class="search">
         <span class="ico ico-search" aria-hidden="true"></span>
         <input id="search" type="search" inputmode="search" placeholder="Поиск станций по всему миру…" autocomplete="off" />
@@ -87,7 +118,16 @@
 
     <footer class="statusbar" id="statusbar">
       <span id="status-text">готово</span>
-      <span id="status-count"></span>
+      <div class="status-actions">
+        <button class="icon-btn status-btn" id="btn-theme" type="button" aria-label="Сменить тему" title="Сменить тему">
+          <span class="ico" data-theme-ico aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn status-btn" id="btn-settings" type="button" aria-label="Настройки" title="Настройки">
+          <span class="ico ico-gear" aria-hidden="true"></span>
+        </button>
+        <span id="status-count"></span>
+        <span class="build-tag" title="Версия сборки">v21</span>
+      </div>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -105,8 +145,6 @@
     <div class="sheet-body" id="sheet-body"></div>
   </section>
 
-  <audio id="audio" preload="none"></audio>
-
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/app.js?v=21"></script>
 </body>
 </html>

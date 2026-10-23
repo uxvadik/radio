@@ -1,5 +1,5 @@
 // Service worker: офлайн-оболочка приложения. Потоки и API никогда не кэшируем.
-const CACHE = 'radio-shell-v20';
+const CACHE = 'radio-shell-v21';
 const ASSETS = [
   './',
   './index.html',
@@ -9,9 +9,12 @@ const ASSETS = [
   './js/ui.js',
   './js/player.js',
   './js/radio.js',
+  './js/tv.js',
+  './js/net.js',
   './js/m3u.js',
   './js/metadata.js',
   './js/noise.js',
+  './vendor/hls.min.js',
   './sample/1.mp3',
   './sample/2.mp3',
   './sample/3.mp3',
@@ -29,6 +32,16 @@ const ASSETS = [
   './playlists/gta-4.m3u',
   './playlists/gta-lcs.m3u',
   './playlists/gta-vcs.m3u',
+  './playlists/tv-edu.m3u',
+  './playlists/tv-edu-kids.m3u',
+  './playlists/tv-main.m3u',
+  './playlists/tv-news.m3u',
+  './playlists/tv-movies.m3u',
+  './playlists/tv-music.m3u',
+  './playlists/tv-comedy.m3u',
+  './playlists/tv-archive.m3u',
+  './playlists/tv-kids.m3u',
+  './playlists/tv-sport.m3u',
   './icons/icon-192.png',
   './icons/icon-384.png',
   './icons/icon-512.png',

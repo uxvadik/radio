@@ -1,0 +1,39 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/2019_Discovery_logo.svg/960px-2019_Discovery_logo.svg.png" group-title="Discovery",Discovery Channel
+https://bl.rutube.ru/livestream/6422d62f7e1f87bc3aec45b462cd89ea/index.m3u8?s=XeqWsIRL1p87Sk4By1FM5A&e=2092695118&scheme=https
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/2018_Animal_Planet_logo.svg/960px-2018_Animal_Planet_logo.svg.png" group-title="Discovery",Animal Planet
+https://bl.rutube.ru/livestream/4004c8f6817b9ae1bd0d418905ae2b02/index.m3u8?s=A7WvvwSbF4FgR7FDCvaHyA&e=2092695118&scheme=https
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/InvestigationDiscoveryLogo2020.svg/960px-InvestigationDiscoveryLogo2020.svg.png" group-title="Discovery",Investigation Discovery
+https://bl.rutube.ru/livestream/a91d58870b9a0d23b2309d020ac4b354/index.m3u8?s=abLRITFZ7CJmrlJ71xf83w&e=2092695120&scheme=https
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/TLC_Logo.svg/960px-TLC_Logo.svg.png" group-title="Discovery",TLC
+https://bl.rutube.ru/livestream/7c3d1a4cc0b4dff1176aa2dbb0b90000/index.m3u8?s=U-DRW2VDcm6DPtUdWwlK7w&e=2092695120&scheme=https
+#EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/logopedia/images/8/82/Travel_Channel_International.svg/revision/latest?cb=20191226223708" group-title="Discovery",Travel Channel
+https://bl.rutube.ru/livestream/4196566bc9c3b7b854074ad1a9a2db36/index.m3u8?s=hfbPfhNpSOCNvolqyMpv7A&e=2092695120&scheme=https
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/960px-Natgeologo.svg.png" group-title="Discovery",National Geographic
+https://bl.rutube.ru/livestream/2619fc295c16585ef018041d88f14db0/index.m3u8?s=3hoJE3dvEezTnjFgyt3rJA&e=2092695119&scheme=https
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/960px-National_Geographic_Wild_logo.svg.png" group-title="Discovery",Nat Geo Wild
+https://bl.rutube.ru/livestream/c11af26c0ab831ce6c37a4888056479b/index.m3u8?s=mXreTrMz-lM0A7c5556N_A&e=2092695119&scheme=https
+#EXTINF:-1 tvg-logo="https://i.imgur.com/n7zOS06.png" group-title="Discovery",Загородный International
+https://bl.rutube.ru/livestream/406973c72e9d0449feef05ef7811ad01/index.m3u8?s=IS3Ul_4C-6aAYKfFNh0x9g&e=2092695120&scheme=https
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Bj1jI7F.png" group-title="Discovery",Охотник и рыболов
+https://bl.rutube.ru/livestream/1da5d92af8c55b16241f1eb12a27f00c/index.m3u8?s=yX16d9wLFeGfjCwck-pCRw&e=2092695117&scheme=https
+#EXTINF:-1 tvg-logo="https://i.imgur.com/dYj3XDa.png" group-title="Наука",Нано ТВ
+https://bl.rutube.ru/livestream/cf958b6c9ae4504be5fc2c1de358a017/index.m3u8?s=kvEMQ-XGnO9m3J36Psi-Xw&e=2092695117&scheme=https
+#EXTINF:-1 tvg-logo="" group-title="Документальное",Документалки и шоу
+https://bl.rutube.ru/livestream/eddcc86d1dee0b5def546ea388eb38ea/index.m3u8?s=R2lGbFUIQSk0l-F0SBq9cQ&e=2092695117&scheme=https
+#EXTINF:-1 tvg-logo="https://i.imgur.com/aeu5zIC.png" group-title="Документальное",RT Documentary
+https://rt-doc.rttv.com/dvr/rtdru/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/dB3cJzO.png" group-title="Документальное",Смотрим 100% Факты
+https://stream.smotrim.ru/hls/fasttv06/playlist_3.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/itRbMX3.png" group-title="Документальное",City Eden КиноДок
+https://cityeden.catcast.tv/content/38354/index.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Russia-Cultura.svg/960px-Russia-Cultura.svg.png" group-title="Культура",Россия-К
+https://zabava-htlive.cdn.ngenix.net/hls/CH_RUSSIAK/variant.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/7orZOJA.png" group-title="Здоровье",Открытый мир. Здоровье
+https://v4.proofix.ru/0mir/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/BM4E0Kr.png" group-title="Здоровье",City Eden МедЗдрав
+https://cityeden.catcast.tv/content/47519/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wR0pvRc.png" group-title="Еда",City Eden Рецепты гурмана
+https://cityeden.catcast.tv/content/47516/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/qpe8L27.png" group-title="Авто",City Eden АвтоГид
+https://cityeden.catcast.tv/content/47515/index.m3u8

@@ -1,4 +1,4 @@
-// DOM-слой: рендер списка/табов/плеера, тосты, шиты.
+// DOM-слой: рендер списка каналов/станций, табов, плеера, тосты, шиты.
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -35,10 +35,27 @@ class UI {
     this.sheetTitle = $('#sheet-title');
     this.sheetBody = $('#sheet-body');
     this.backdrop = $('#backdrop');
+
+    this.screen = $('#screen');
+    this.idleLogo = $('#idle-logo');
+    this.idleMark = $('#idle-mark');
+    this.idleHint = $('#idle-hint');
+    this.screenLoading = $('#screen-loading');
+    this.npRes = $('#np-res');
+
+    // ТВ-OSD
     this.npStation = $('#np-station');
-    this.npTrack = $('#np-track');
     this.npBadge = $('#np-badge');
-    this.spectrum = $('#spectrum');
+    // Радио-LCD
+    this.rStation = $('#r-station');
+    this.rBadge = $('#r-badge');
+    // оба бегущих трека
+    this.tracks = [$('#np-track'), $('#r-track')].filter(Boolean);
+
+    this.idleLogo.addEventListener('error', () => {
+      this.idleLogo.hidden = true;
+      this.screen.classList.remove('has-logo');
+    });
 
     this.onPick = null;
     this.onLongPress = null;
@@ -93,50 +110,66 @@ class UI {
 
   // ------------------------------------------------------------- список
   setLoading() {
-    this.listEl.replaceChildren(h('div', { class: 'list-msg' }, h('div', { class: 'spinner' }), 'Загружаю станции…'));
-    this.setStatus('соединяюсь с каталогом…');
+    this.listEl.replaceChildren(h('div', { class: 'list-msg' }, h('div', { class: 'spinner' }), 'Загружаю…'));
+    this.setStatus('загружаю плейлист…');
   }
 
   setMessage(text) {
     this.listEl.replaceChildren(h('div', { class: 'list-empty', html: text }));
   }
 
-  renderList(stations, { activeUrl, playing, favoritesSet } = {}) {
-    if (!stations || !stations.length) {
+  renderList(items, { activeUrl, playing, favoritesSet, mode } = {}) {
+    if (!items || !items.length) {
       this.setMessage('Ничего не найдено.');
       this.setCount(0);
       return;
     }
+    const isTv = mode === 'tv';
     const frag = document.createDocumentFragment();
-    stations.forEach((s, i) => {
-      const active = activeUrl && s.url === activeUrl;
-      const fav = favoritesSet ? favoritesSet.has(s.id) || favoritesSet.has(s.url) : false;
-      const sub = this._sub(s);
+    items.forEach((c, i) => {
+      const active = activeUrl && c.url === activeUrl;
+      const fav = favoritesSet ? favoritesSet.has(c.id) || favoritesSet.has(c.url) : false;
+      const favMark = fav ? '<span class="fav-mark ico ico-star"></span>' : '';
+      const info =
+        `<div class="info"><div class="name">${esc(c.name)}</div>` +
+        `<div class="meta">${esc(this._sub(c, isTv))}</div></div>`;
+
+      let lead;
+      if (isTv) {
+        const logo = c.favicon
+          ? `<img src="${esc(c.favicon)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />`
+          : '';
+        lead =
+          `<div class="logo">${logo}<span class="fallback">${i + 1}</span>` +
+          `<span class="eq-bars"><i></i><i></i><i></i></span></div>`;
+      } else {
+        lead =
+          `<div class="eq"><span class="num">${i + 1}</span>` +
+          `<span class="eq-bars"><i></i><i></i><i></i></span></div>`;
+      }
+
       const row = h('div', {
         class: 'station' + (active ? ' active' : '') + (active && !playing ? ' paused' : ''),
-        dataset: { i, url: s.url },
+        dataset: { i, url: c.url },
       });
-      row.innerHTML =
-        `<div class="eq"><span class="num">${i + 1}</span>` +
-        `<span class="eq-bars"><i></i><i></i><i></i></span></div>` +
-        `<div class="info"><div class="name">${esc(s.name)}</div>` +
-        `<div class="meta">${esc(sub)}</div></div>` +
-        (fav ? '<span class="fav-mark ico ico-star"></span>' : '');
+      row.innerHTML = lead + info + favMark;
       frag.append(row);
     });
     this.listEl.replaceChildren(frag);
-    this.setCount(stations.length);
+    this.setCount(items.length);
   }
 
-  _sub(s) {
+  _sub(c, isTv) {
     const bits = [];
-    if (s.country) bits.push(s.country);
-    if (s.bitrate) bits.push(s.bitrate + ' kbps');
-    if (s.codec) bits.push(String(s.codec).toUpperCase());
-    if (!bits.length && s.group) bits.push(s.group);
-    if (!bits.length && s.url) {
+    if (c.group) bits.push(c.group);
+    if (c.quality) bits.push(c.quality);
+    if (c.note) bits.push(c.note);
+    if (c.country) bits.push(c.country);
+    if (c.bitrate) bits.push(c.bitrate + ' kbps');
+    if (c.codec) bits.push(String(c.codec).toUpperCase());
+    if (!bits.length && c.url) {
       try {
-        bits.push(new URL(s.url).hostname);
+        bits.push(new URL(c.url).hostname);
       } catch {
         /* ignore */
       }
@@ -162,18 +195,27 @@ class UI {
   }
 
   // ------------------------------------------------------------- плеер
-  setPlayerInfo({ station, badge, track, playing }) {
-    this.npStation.textContent = station ? station.name : '— выбери станцию —';
-    if (badge) this.npBadge.textContent = badge;
-    this.setTrack(track ?? (station ? 'потоковое радио' : 'потоковое радио'));
+  setPlayerInfo({ channel, badge, track, playing }) {
+    const name = channel ? channel.name : '';
+    this.npStation.textContent = name || '— выбери канал —';
+    if (this.rStation) this.rStation.textContent = name || '— выбери станцию —';
+    if (badge) {
+      this.npBadge.textContent = badge;
+      if (this.rBadge) this.rBadge.textContent = badge;
+    }
+    this.setTrack(track ?? 'потоковое радио');
     document.body.classList.toggle('playing', !!playing);
   }
 
   setTrack(text) {
-    const el = this.npTrack;
+    const value = text || '—';
+    this.tracks.forEach((el) => this._marquee(el, value));
+  }
+
+  _marquee(el, text) {
     el.classList.remove('scrolling');
     el.style.animationDuration = '';
-    el.textContent = text || '—';
+    el.textContent = text;
     requestAnimationFrame(() => {
       const wrap = el.parentElement;
       if (!wrap) return;
@@ -184,6 +226,26 @@ class UI {
         el.classList.add('scrolling');
       }
     });
+  }
+
+  setResolution(text) {
+    if (this.npRes) this.npRes.textContent = text || '';
+  }
+
+  setScreenState(state, { logo, text } = {}) {
+    this.screen.dataset.state = state;
+    const hasLogo = !!logo;
+    this.screen.classList.toggle('has-logo', hasLogo);
+    const showIdle = state === 'idle' || state === 'loading' || state === 'error';
+    if (hasLogo && showIdle) {
+      if (this.idleLogo.getAttribute('src') !== logo) this.idleLogo.src = logo;
+      this.idleLogo.hidden = false;
+    } else {
+      this.idleLogo.hidden = true;
+      this.idleLogo.removeAttribute('src');
+    }
+    this.idleHint.textContent = text || (state === 'idle' ? 'выбери канал' : '');
+    this.screenLoading.hidden = state !== 'loading';
   }
 
   setStatus(text, count) {

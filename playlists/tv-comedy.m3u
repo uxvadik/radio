@@ -1,0 +1,7 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/T4A6rEI.png" group-title="Юмор",ТНТ (576p)
+https://zabava-htlive.cdn.ngenix.net/hls/CH_TNT/variant.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/gBokU5i.png" group-title="Юмор",ТНТ4 (576p)
+https://zabava-htlive.cdn.ngenix.net/hls/CH_TNT4/variant.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/T4A6rEI.png" group-title="Юмор",ТНТ Music
+https://bl.rutube.ru/livestream/5a294ae1ed12c44c7053301fb5fa9ba0/index.m3u8?s=h_GA0GgRa6uQOr38wM3lPw&e=2092695155&scheme=https

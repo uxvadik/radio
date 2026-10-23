@@ -1,0 +1,23 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/C8CCjZK.png" group-title="Музыка",Майдан (720p)
+https://live-maidantv.cdnvideo.ru/maidantv/maidantv.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/WsPlKJJ.png" group-title="Музыка",Страна FM
+https://live-stranafm.cdnvideo.ru/stranafm/smil:stranafm.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/OFhQQCD.png" group-title="Музыка",VIVA Россия
+https://live20.bozztv.com/akamaissh101/ssh101/vivarussia/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.knmusictv.com/wp-content/uploads/2026/01/LOGO2112.png" group-title="Музыка",KN Music
+https://cdn4.yayin.com.tr/kntv/tracks-v1a1/mono.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Puk1Bhx.png" group-title="Музыка",Муз Союз (576p)
+https://hls-tvsoyuz.cdnvideo.ru/tvsoyuz2/muzsoyuz.6fw0-58xp-acts-esy0/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/DIKe5vA.png" group-title="Музыка",Музыка 1 [Not 24/7]
+https://kino-1.catcast.tv/content/37745/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/2SG0Swa.png" group-title="Музыка",Музыка Кино [Not 24/7]
+https://kino-1.catcast.tv/content/37739/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ozEqob9.png" group-title="Музыка",City Eden Play [Not 24/7]
+https://cityeden.catcast.tv/content/34100/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/V3MTfyc.png" group-title="Музыка",City Eden Сиртаки [Not 24/7]
+https://cityeden.catcast.tv/content/46421/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/l7BE8l6.png" group-title="Музыка",City Eden Классика [Not 24/7]
+https://cityeden.catcast.tv/content/47400/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/38Q5L5W.png" group-title="Музыка",City Eden Бирма [Not 24/7]
+https://cityeden.catcast.tv/content/34364/index.m3u8

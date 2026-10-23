@@ -1,0 +1,13 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8t9mdg9.png" group-title="Новости",Евроньюс (720p)
+https://cdn-euronews.akamaized.net/live/eds/euronews-ru/25071/index.m3u8
+#EXTINF:-1 tvg-logo="https://pbs.twimg.com/media/FiHmjBrWIBsN41d.jpg" group-title="Новости",RT Балкан (1080p)
+https://rt-srb.rttv.com/dvr/rtbalkan/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ZBHqSZj.png" group-title="Новости",Вести FM (720p)
+https://stream.smotrim.ru/hls2/vesti_fm/playlist_4.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9WcnjQN.png" group-title="Новости",Астрахань 24 (720p)
+https://streaming.astrakhan.ru/astrakhan24/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ti4OMBv.png" group-title="Новости",Первый Республиканский
+https://streaming.televizor-24-tochka.ru/live/27.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/gXbUMVy.png" group-title="Новости",Москва 24 (1080p)
+https://stream.smotrim.ru/hls/givc8/playlist.m3u8?entity=channel&id=798&sign=37881ef2e289f062ceff0dca6c24dc58

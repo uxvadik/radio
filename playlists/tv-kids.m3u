@@ -1,0 +1,13 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/1hsNeTa.png" group-title="Детям",Смотрим 100% Детское (720p)
+https://stream.smotrim.ru/hls/fasttv05/playlist_3.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Ia3acCB.png" group-title="Детям",Тамыр (576p)
+https://bsttv.bonus-tv.ru/cdn/tamyr/playlist.m3u8
+#EXTINF:-1 group-title="Детям",Мультфильмы 24/7
+https://bl.rutube.ru/livestream/76de13007ff82a001f786f148e9fd39a/index.m3u8?s=rk88NG6zF81uG3NcXt-hYQ&e=2092695150&scheme=https
+#EXTINF:-1 group-title="Детям",Мультимейшн
+https://bl.rutube.ru/livestream/bc2933d28daf33f5a68257ebc72787cd/index.m3u8?s=GdRsBfTFP_tYZ_YI0dKcHw&e=2092695150&scheme=https
+#EXTINF:-1 group-title="Детям",Мультаташечки
+https://bl.rutube.ru/livestream/25a96d214a176541fba1d342ac760ee9/index.m3u8?s=z0B_HNfCH553sk6ilA6aVw&e=2092695151&scheme=https
+#EXTINF:-1 group-title="Детям",Радость моя
+https://bl.rutube.ru/livestream/9ad2099eed71b4a0e577292c3bfd0708/index.m3u8?s=Whs6rbeOQ3Dn1qfoKNfN4A&e=2092695151&scheme=https

@@ -1,0 +1,35 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/5sis895.png" group-title="Кино",Star Cinema
+https://dash2.antik.sk/live/test_star_cinema_atktv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/eGuGHnZ.png" group-title="Кино",Star Family (1080p)
+https://dash2.antik.sk/live/test_star_family_atktv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ZbOqfy4.png" group-title="Кино",Хорошее Кино (720p)
+https://live-rian.cdnvideo.ru/rian/rus-radio/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/scDKOLS.png" group-title="Кино",Bollywood HD (576p)
+https://xykt-fix.github.io/cinerama_edge01/hls/BOLLYWOOD_RU/Movie009.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/aASNpKq.png" group-title="Кино",Смотрим 100% Классика (720p)
+https://stream.smotrim.ru/hls/fasttv03/playlist_3.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/4EFh0nu.png" group-title="Кино",Смотрим 100% Любовь (720p)
+https://stream.smotrim.ru/hls/fasttv01/playlist_2.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/UY3fjYU.png" group-title="Кино",Смотрим 100% Мужское (720p)
+https://stream.smotrim.ru/hls/fasttv02/playlist_3.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/uuzuvD0.png" group-title="Кино",City Eden Экшен [Not 24/7]
+https://cityeden.catcast.tv/content/41333/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Aga2XVA.png" group-title="Кино",City Eden Комедия [Not 24/7]
+https://cityeden.catcast.tv/content/41331/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9rKHwBV.png" group-title="Кино",City Eden Детектив [Not 24/7]
+https://cityeden.catcast.tv/content/41327/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/I64FeIO.png" group-title="Кино",City Eden Фантастика [Not 24/7]
+https://cityeden.catcast.tv/content/45268/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/29ddffh.png" group-title="Кино",City Eden Драма [Not 24/7]
+https://cityeden.catcast.tv/content/45269/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/s1Pid0K.png" group-title="Кино",City Eden Мистика [Not 24/7]
+https://cityeden.catcast.tv/content/40783/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/67CWCtz.png" group-title="Кино",City Eden Артхаус [Not 24/7]
+https://cityeden.catcast.tv/content/38398/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/gaket4B.png" group-title="Кино",City Eden Азия [Not 24/7]
+https://cityeden.catcast.tv/content/34393/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/0qGCS1S.png" group-title="Кино",City Eden Классика [Not 24/7]
+https://cityeden.catcast.tv/content/34185/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/mT5liTh.png" group-title="Кино",City Eden Теленовелла [Not 24/7]
+https://cityeden.catcast.tv/content/46209/index.m3u8
