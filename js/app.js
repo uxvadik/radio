@@ -1182,6 +1182,17 @@ function bindTopbar() {
 
 ui.onPick = pickChannel;
 ui.onLongPress = openStationSheet;
+ui.onUnfav = (i) => {
+  const item = currentChannels[i];
+  if (!item) return;
+  favorites.remove(item, mode);
+  if (currentPlaylistId === 'fav') {
+    currentChannels = currentChannels.filter((x) => x.id !== item.id && x.url !== item.url);
+  }
+  updateFavButton();
+  renderList();
+  ui.toast('Убрано из избранного');
+};
 
 // ------------------------------------------------------------------- start
 function init() {

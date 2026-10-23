@@ -841,6 +841,9 @@ body.fav #btn-fav .ico {
   color: var(--accent);
   flex: none;
   display: block;
+  cursor: pointer;
+  padding: 5px;
+  margin: -5px -5px -5px 0;
   filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 40%, transparent));
 }
 

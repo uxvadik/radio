@@ -20,6 +20,7 @@ const DEFAULTS = {
   metadataInterval: 15, // сек
   noise: false,          // шумы радио (по умолчанию выключены)
   noiseOffDefault: true, // миграция: выключить шумы у старых настроек
+  modeSplitMigrated: true, // миграция: разделить избранное/недавние радио и ТВ
   metaUrls: {},          // stationId -> url метаданных
 
   // общее
@@ -36,22 +37,52 @@ const DEFAULTS = {
   recentTv: [],        // недавние ТВ
 };
 
+function isVideoUrl(url) {
+  const s = String(url || '');
+  return /\.m3u8(\?|#|$)/i.test(s) || /\.mpd(\?|#|$)/i.test(s) || /rutube\.ru/i.test(s);
+}
+
+function dedupe(items) {
+  const seen = new Set();
+  const out = [];
+  for (const it of items) {
+    if (!it || !it.url || seen.has(it.url)) continue;
+    seen.add(it.url);
+    out.push(it);
+  }
+  return out;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULTS);
     const parsed = JSON.parse(raw);
     const merged = { ...structuredClone(DEFAULTS), ...parsed };
+    let migrated = false;
 
     // одноразово выключаем шумы у уже сохранённых настроек
     if (parsed.noiseOffDefault !== true) {
       merged.noise = false;
       merged.noiseOffDefault = true;
-      try {
-        localStorage.setItem(KEY, JSON.stringify(merged));
-      } catch {
-        /* ignore */
-      }
+      migrated = true;
+    }
+
+    // одноразово разносим ранее общее избранное/недавние по режимам:
+    // ТВ-потоки (.m3u8/.mpd/Rutube) уходят в ТВ, остальное остаётся в радио.
+    if (parsed.modeSplitMigrated !== true) {
+      const favs = Array.isArray(merged.favorites) ? merged.favorites : [];
+      const favsTv = Array.isArray(merged.favoritesTv) ? merged.favoritesTv : [];
+      merged.favorites = favs.filter((x) => x && !isVideoUrl(x.url));
+      merged.favoritesTv = dedupe([...favs.filter((x) => x && isVideoUrl(x.url)), ...favsTv]);
+
+      const rec = Array.isArray(merged.recent) ? merged.recent : [];
+      const recTv = Array.isArray(merged.recentTv) ? merged.recentTv : [];
+      merged.recent = rec.filter((x) => x && !isVideoUrl(x.url));
+      merged.recentTv = dedupe([...rec.filter((x) => x && isVideoUrl(x.url)), ...recTv]);
+
+      merged.modeSplitMigrated = true;
+      migrated = true;
     }
 
     // corsfix нужен для ТВ (Rutube) — держим первым
@@ -65,6 +96,14 @@ function load() {
       merged.activePlaylistRadio = parsed.activePlaylistId || 'b-altrock';
     }
     if (merged.mode !== 'tv' && merged.mode !== 'radio') merged.mode = 'radio';
+
+    if (migrated) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(merged));
+      } catch {
+        /* ignore */
+      }
+    }
 
     return merged;
   } catch {

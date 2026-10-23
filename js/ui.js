@@ -59,6 +59,7 @@ class UI {
 
     this.onPick = null;
     this.onLongPress = null;
+    this.onUnfav = null;
     this._pressTimer = null;
     this._suppressClick = false;
     this._bindList();
@@ -69,6 +70,12 @@ class UI {
     this.listEl.addEventListener('click', (e) => {
       if (this._suppressClick) {
         this._suppressClick = false;
+        return;
+      }
+      const favBtn = e.target.closest('.fav-mark[data-fav]');
+      if (favBtn) {
+        const fr = favBtn.closest('[data-i]');
+        if (fr && this.onUnfav) this.onUnfav(Number(fr.dataset.i));
         return;
       }
       const row = e.target.closest('[data-i]');
@@ -129,7 +136,9 @@ class UI {
     items.forEach((c, i) => {
       const active = activeUrl && c.url === activeUrl;
       const fav = favoritesSet ? favoritesSet.has(c.id) || favoritesSet.has(c.url) : false;
-      const favMark = fav ? '<span class="fav-mark ico ico-star"></span>' : '';
+      const favMark = fav
+        ? '<span class="fav-mark ico ico-star" data-fav="1" role="button" title="Убрать из избранного"></span>'
+        : '';
       const info =
         `<div class="info"><div class="name">${esc(c.name)}</div>` +
         `<div class="meta">${esc(this._sub(c, isTv))}</div></div>`;
