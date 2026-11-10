@@ -127,6 +127,8 @@ select option { background: var(--panel-2); color: var(--text); }
   margin: 0 auto;
   background: var(--brush-v), var(--bg-grad);
   overflow: hidden;
+  /* Leaflet использует z-index 400–1000; изолируем, чтобы шиты были поверх карты */
+  isolation: isolate;
 }
 
 @media (min-width: 620px) {
@@ -1382,3 +1384,27 @@ body.playing .spectrum i:nth-child(7n) { animation-duration: 1.05s; }
 .map-station:hover { border-color: var(--line-2); }
 .map-station .ms-name { font-size: 14px; font-weight: 600; }
 .map-station .ms-meta { font-size: 11px; color: var(--muted); }
+
+/* карта под тёмную/светлую тему */
+html[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.62);
+}
+html[data-theme="dark"] .leaflet-container { background: #07080a; }
+html[data-theme="dark"] .leaflet-bar a,
+html[data-theme="dark"] .leaflet-bar a:hover {
+  background: #1b1e24;
+  color: var(--text);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(10, 12, 16, .72);
+  color: #aeb4bf;
+}
+html[data-theme="dark"] .leaflet-control-attribution a { color: #d9dce2; }
+html[data-theme="dark"] .leaflet-tooltip {
+  background: #1b1e24;
+  color: var(--text);
+  border-color: var(--line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+}
+html[data-theme="dark"] .leaflet-tooltip-top:before { border-top-color: #1b1e24; }
