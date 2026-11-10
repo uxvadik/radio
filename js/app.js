@@ -7,6 +7,7 @@ import { fetchText } from './net.js';
 import { resolveNowPlaying } from './metadata.js';
 import { NoiseEngine } from './noise.js';
 import { searchStations, PRESETS, BUNDLED as RADIO_BUNDLED, GTA } from './radio.js';
+import { FMMap, fetchPlaces, loadPlacesCache, savePlacesCache, fetchPlaceChannels } from './map.js';
 import { ui, h, $ } from './ui.js';
 
 const player = new Player($('#video'));
@@ -14,6 +15,10 @@ const appEl = $('#app');
 const playerEl = $('#player');
 const modeSwitch = $('#mode-switch');
 const btnPip = $('#btn-pip');
+const mapWrap = $('#map-wrap');
+const mapEl = $('#map');
+const mapStatus = $('#map-status');
+const mapHint = $('#map-hint');
 
 // ------------------------------------------------------------------- шумы
 const noise = new NoiseEngine([
@@ -41,7 +46,7 @@ function startSilenceWatch() {
   stallMs = 0;
   silenceTimer = setInterval(() => {
     const a = player.video;
-    const wantsPlay = mode === 'radio' && !!player.channel && !a.paused && !a.ended && !player.error;
+    const wantsPlay = mode !== 'tv' && !!player.channel && !a.paused && !a.ended && !player.error;
     const t = a.currentTime;
     const progressed = prevTime === null ? false : t !== prevTime;
     prevTime = t;
@@ -71,7 +76,7 @@ function startSilenceWatch() {
 }
 
 // ------------------------------------------------------------------ состояние
-let mode = store.get('mode') === 'tv' ? 'tv' : 'radio';
+let mode = ['radio', 'map', 'tv'].includes(store.get('mode')) ? store.get('mode') : 'radio';
 let currentPlaylistId = defaultPlaylistId(mode);
 let currentChannels = [];
 let selectToken = 0;
@@ -81,6 +86,15 @@ let searchTimer = null;
 let searchMode = false;
 let deferredPrompt = null;
 let miniDrag = null;
+
+let fmmap = null;
+let placesLoaded = false;
+let placesLoading = false;
+const channelCache = new Map();
+
+function isAudioMode() {
+  return mode !== 'tv';
+}
 
 const bundledCache = new Map();
 
@@ -336,7 +350,7 @@ function badgeFor(st) {
 }
 
 function trackText(st) {
-  if (mode === 'radio') {
+  if (mode !== 'tv') {
     if (player.nowPlaying) return player.nowPlaying;
     if (st.error) return st.error;
     if (!st.channel) return 'потоковое радио';
@@ -384,14 +398,14 @@ function applyPlayerState(st) {
   else if (!st.channel) ui.setStatus('готово');
 
   renderList();
-  if (mode === 'radio' && st.playing) refreshNowPlaying();
+  if (mode !== 'tv' && st.playing) refreshNowPlaying();
 }
 
 player.on('station', (channel) => {
   ui.setResolution('');
   applyPlayerState({ channel, loading: true, error: null, playing: false });
   updateFavButton();
-  if (mode === 'radio') {
+  if (mode !== 'tv') {
     startMetadata();
     noise.unlock(); // разблокируем Web Audio в жесте пользователя
   }
@@ -425,7 +439,8 @@ function startMetadata() {
   stopMetadata();
   metaToken++;
   player.setNowPlaying('');
-  if (mode !== 'radio' || !store.get('metadata')) return;
+  const s = player.channel;
+  if (mode === 'tv' || !s || s.source === 'radiogarden' || !store.get('metadata')) return;
   refreshNowPlaying();
   const sec = Math.max(5, Number(store.get('metadataInterval')) || 15);
   metaTimer = setInterval(refreshNowPlaying, sec * 1000);
@@ -436,7 +451,7 @@ function stopMetadata() {
 }
 async function refreshNowPlaying() {
   const s = player.channel;
-  if (mode !== 'radio' || !s || player.video.paused) return;
+  if (mode === 'tv' || !s || s.source === 'radiogarden' || player.video.paused) return;
   const token = metaToken;
   try {
     const res = await resolveNowPlaying(s, {
@@ -1027,11 +1042,122 @@ function openStationSheet(index) {
   ui.openSheet('Станция / канал', body);
 }
 
+// ------------------------------------------------------------------ FM map
+function ensureMap() {
+  if (!fmmap) {
+    fmmap = new FMMap({
+      el: mapEl,
+      statusEl: mapStatus,
+      hintEl: mapHint,
+      onOpenPlace: openPlace,
+    });
+  }
+  fmmap
+    .ensure()
+    .then(() => {
+      fmmap.invalidate();
+      if (!placesLoaded && !placesLoading) loadPlaces();
+    })
+    .catch(() => {
+      /* статус уже показан */
+    });
+}
+
+async function loadPlaces() {
+  if (!fmmap || placesLoaded || placesLoading) return;
+  placesLoading = true;
+  const cache = loadPlacesCache();
+
+  if (cache && cache.fresh) {
+    fmmap.setPlaces(cache.places);
+    fmmap.status('');
+    placesLoaded = true;
+    placesLoading = false;
+    return;
+  }
+  if (cache) fmmap.setPlaces(cache.places);
+
+  fmmap.status(cache ? 'Обновляю карту…' : 'Загружаю карту Radio Garden…');
+  try {
+    const places = await fetchPlaces(store.get('proxies'));
+    if (!places.length) throw new Error('empty');
+    savePlacesCache(places);
+    fmmap.setPlaces(places);
+    fmmap.status('');
+    placesLoaded = true;
+  } catch {
+    if (cache) {
+      fmmap.setPlaces(cache.places);
+      fmmap.status('');
+      ui.toast('Карта из кэша');
+    } else {
+      fmmap.status('Не удалось загрузить карту. Проверь прокси в настройках.');
+    }
+  } finally {
+    placesLoading = false;
+  }
+}
+
+async function openPlace(place) {
+  const loading = h('div', {}, h('div', { class: 'list-msg' }, h('div', { class: 'spinner' }), 'Загружаю станции…'));
+  ui.openSheet(place.title || 'FM map', loading);
+
+  let stations = channelCache.get(place.id);
+  if (!stations) {
+    try {
+      stations = await fetchPlaceChannels(place, store.get('proxies'));
+      channelCache.set(place.id, stations);
+    } catch {
+      stations = null;
+    }
+  }
+  if (!stations) {
+    ui.openSheet(place.title || 'FM map', h('div', { class: 'list-empty' }, 'Не удалось получить станции.<br>Попробуй ещё раз.'));
+    return;
+  }
+  if (!stations.length) {
+    ui.openSheet(place.title || 'FM map', h('div', { class: 'list-empty' }, 'Здесь нет доступных станций.'));
+    return;
+  }
+
+  const MAX = 250;
+  const shown = stations.slice(0, MAX);
+  const metaText = [
+    place.country,
+    `${stations.length} станций${stations.length > MAX ? ` · первые ${MAX}` : ''}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const list = h(
+    'div',
+    {},
+    h('div', { class: 'map-place-meta' }, metaText),
+    ...shown.map((s, i) =>
+      h(
+        'button',
+        { class: 'map-station', type: 'button', onClick: () => playMapStation(s, stations, i) },
+        h('span', { class: 'ms-name' }, s.name),
+        h('span', { class: 'ms-meta' }, ['Radio Garden', s.country].filter(Boolean).join(' · '))
+      )
+    )
+  );
+  ui.openSheet(place.title || 'FM map', list);
+}
+
+function playMapStation(station, stations, index) {
+  currentChannels = stations;
+  recent.push(station, 'radio');
+  player.playStation(station, stations, index);
+  ui.closeSheet();
+  ui.setStatus('FM map');
+}
+
 // ------------------------------------------------------------------ режимы
 function applyMode() {
   appEl.dataset.mode = mode;
   modeSwitch.dataset.mode = mode;
   [...modeSwitch.querySelectorAll('.mode-opt')].forEach((el) => el.classList.toggle('active', el.dataset.pos === mode));
+  if (mode === 'map') ensureMap();
 }
 
 function resetIdle() {
@@ -1051,16 +1177,31 @@ function resetIdle() {
 
 function setMode(next) {
   if (next === mode) return;
-  if (player.channel) player.stop();
-  stopMetadata();
-  noise.stop();
-  noiseOn = false;
+  const stop = (next === 'tv') !== (mode === 'tv');
+  if (stop && player.channel) player.stop();
+  if (next === 'tv') {
+    stopMetadata();
+    noise.stop();
+    noiseOn = false;
+  }
   exitSearch();
   mode = next;
   store.set({ mode });
-  currentPlaylistId = defaultPlaylistId(mode);
   applyMode();
-  resetIdle();
+
+  if (next === 'map') {
+    ui.setStatus('FM map');
+    return;
+  }
+  if (next === 'tv') {
+    currentPlaylistId = defaultPlaylistId('tv');
+    resetIdle();
+    selectPlaylist(currentPlaylistId, { silent: true });
+    return;
+  }
+  // radio
+  currentPlaylistId = defaultPlaylistId('radio');
+  if (stop) resetIdle();
   selectPlaylist(currentPlaylistId, { silent: true });
 }
 
@@ -1078,7 +1219,10 @@ function bindTopbar() {
   $('#btn-fs').addEventListener('click', toggleFullscreen);
   $('#btn-add').addEventListener('click', openAddSheet);
 
-  modeSwitch.addEventListener('click', () => setMode(mode === 'radio' ? 'tv' : 'radio'));
+  modeSwitch.addEventListener('click', () => {
+    const order = ['radio', 'map', 'tv'];
+    setMode(order[(order.indexOf(mode) + 1) % order.length]);
+  });
 
   $('#btn-play').addEventListener('click', () => {
     if (player.channel && player.error) {
@@ -1212,6 +1356,11 @@ function init() {
   resetIdle();
 
   renderTabs();
+  if (mode === 'map') {
+    currentPlaylistId = defaultPlaylistId('radio');
+    ui.setStatus('FM map');
+    return;
+  }
   const ids = allPlaylists().map((p) => p.id);
   if (!ids.includes(currentPlaylistId)) currentPlaylistId = defaultPlaylistId(mode);
   selectPlaylist(currentPlaylistId, { silent: true });

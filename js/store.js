@@ -95,7 +95,7 @@ function load() {
     if (parsed.activePlaylistRadio === undefined) {
       merged.activePlaylistRadio = parsed.activePlaylistId || 'b-altrock';
     }
-    if (merged.mode !== 'tv' && merged.mode !== 'radio') merged.mode = 'radio';
+    if (merged.mode !== 'tv' && merged.mode !== 'radio' && merged.mode !== 'map') merged.mode = 'radio';
 
     if (migrated) {
       try {

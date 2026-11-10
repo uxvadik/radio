@@ -26,6 +26,8 @@
   локальный hls.js (Chrome/Firefox).
 - **Rutube**: live и VOD через CORS-прокси (master переписывается, VOD резолвится
   через API).
+- **FM map** (третья вкладка): карта Radio Garden (Leaflet + OpenStreetMap) —
+  точки-города, по клику список станций места; играет оригинальный поток Radio Garden.
 - **Свой контент** (радио): добавление любого `.m3u`/`.m3u8` по ссылке или
   отдельной станции по прямой ссылке.
 - **«Сейчас играет»** (радио): Icecast (`/status-json.xsl`) и SHOUTcast
@@ -93,6 +95,7 @@ js/app.js                  логика, режимы Radio/TV, связка м�
 js/store.js                состояние + localStorage (радио и ТВ)
 js/player.js               <video>, HLS/hls.js, Rutube live/VOD, Media Session
 js/radio.js                каталог radio-browser + радио-плейлисты (AI/NFS/GTA)
+js/map.js                  FM map: Radio Garden + Leaflet
 js/tv.js                   встроенные ТВ-плейлисты
 js/net.js                  загрузка m3u/HLS через CORS-прокси
 js/metadata.js             Icecast/SHOUTcast «сейчас играет» (радио)
@@ -102,6 +105,7 @@ js/ui.js                   рендер списка/табов/экрана/ш�
 playlists/*.m3u            встроенные плейлисты (радио и ТВ)
 sample/*.mp3               сэмплы шумов для буферизации
 vendor/hls.min.js          hls.js (Apache-2.0) для HLS в Chrome/Firefox
+vendor/leaflet/            Leaflet 1.9.4 (карта)
 worker/                    CORS-прокси для Cloudflare Workers
 sw.js, manifest.webmanifest, icons/
 tools/make-icons.mjs       генератор иконок (node tools/make-icons.mjs)
@@ -118,3 +122,7 @@ tools/make-icons.mjs       генератор иконок (node tools/make-icon
 - **HTTP-потоки** не откроются на HTTPS-странице (mixed content) — встроенные
   плейлисты содержат только HTTPS.
 - Каталог радио работает через публичное API radio-browser.info.
+- **FM map** использует неофициальный API Radio Garden. JSON берётся через CORS:
+  по умолчанию через публичный `r.jina.ai`, либо через свой Worker из `worker/`
+  (он уже умеет отдавать radio.garden с нужными заголовками). Список мест
+  кэшируется на 14 дней, потоки играют напрямую с Radio Garden.

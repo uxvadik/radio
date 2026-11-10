@@ -26,17 +26,23 @@ export default {
     }
 
     try {
-      const upstream = await fetch(parsed.toString(), {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (RadioPWA proxy)',
-          Accept: 'application/json, text/plain, */*',
-        },
-        redirect: 'follow',
-      });
-      const headers = new Headers(CORS);
-      headers.set('Content-Type', upstream.headers.get('Content-Type') || 'text/plain; charset=utf-8');
-      headers.set('Cache-Control', 'no-store');
-      return new Response(upstream.body, { status: upstream.status, headers });
+      const isRadioGarden = /(^|\.)radio\.garden$/i.test(parsed.hostname);
+      const headers = {
+        'User-Agent': isRadioGarden
+          ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36'
+          : 'Mozilla/5.0 (RadioPWA proxy)',
+        Accept: 'application/json, text/plain, */*',
+      };
+      // Radio Garden закрыт Cloudflare: без Referer/Origin отдаёт 403.
+      if (isRadioGarden) {
+        headers.Referer = 'https://radio.garden/';
+        headers.Origin = 'https://radio.garden';
+      }
+      const upstream = await fetch(parsed.toString(), { headers, redirect: 'follow' });
+      const out = new Headers(CORS);
+      out.set('Content-Type', upstream.headers.get('Content-Type') || 'text/plain; charset=utf-8');
+      out.set('Cache-Control', 'no-store');
+      return new Response(upstream.body, { status: upstream.status, headers: out });
     } catch (e) {
       return new Response('upstream error: ' + e.message, { status: 502, headers: CORS });
     }

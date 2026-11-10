@@ -158,7 +158,7 @@ select option { background: var(--panel-2); color: var(--text); }
   -webkit-appearance: none;
   display: block;
   flex: none;
-  width: min(210px, calc(100% - 64px));
+  width: min(300px, calc(100% - 40px));
   margin: max(env(safe-area-inset-top), 10px) auto 0;
   padding: 3px;
   border-radius: 13px;
@@ -198,7 +198,7 @@ select option { background: var(--panel-2); color: var(--text); }
   z-index: 1;
   top: 3px;
   left: 3px;
-  width: calc(50% - 3px);
+  width: calc((100% - 6px) / 3);
   height: calc(100% - 6px);
   border-radius: 8px;
   background: var(--metal-knob);
@@ -208,7 +208,8 @@ select option { background: var(--panel-2); color: var(--text); }
     0 2px 5px rgba(0, 0, 0, .55);
   transition: transform .2s var(--ease);
 }
-.mode-switch[data-mode="tv"] .mode-knob { transform: translateX(100%); }
+.mode-switch[data-mode="map"] .mode-knob { transform: translateX(100%); }
+.mode-switch[data-mode="tv"] .mode-knob { transform: translateX(200%); }
 .mode-opt {
   position: relative;
   z-index: 2;
@@ -1167,9 +1168,14 @@ body.fav .ico-star { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 /* ===================================================================== */
 
 /* видимость элементов по режиму */
-.app[data-mode="radio"] .screen { display: none; }
+.app[data-mode="radio"] .screen,
+.app[data-mode="map"] .screen { display: none; }
 .app[data-mode="tv"] .lcd { display: none; }
 .app[data-mode="tv"] .tools { display: none; }
+.app[data-mode="map"] .tabs,
+.app[data-mode="map"] .tools,
+.app[data-mode="map"] .list { display: none; }
+.app[data-mode="map"] .map-wrap { display: block; }
 
 /* VFD-дисплей радио */
 .lcd {
@@ -1299,3 +1305,80 @@ body.playing .spectrum i:nth-child(7n) { animation-duration: 1.05s; }
 .station.active .eq .eq-bars i:nth-child(2) { animation-delay: .2s; }
 .station.active .eq .eq-bars i:nth-child(3) { animation-delay: .35s; }
 .station.paused .eq .eq-bars i { animation-play-state: paused; height: 40% !important; }
+
+/* ===================================================================== */
+/* merged: FM map (Radio Garden + Leaflet)                               */
+/* ===================================================================== */
+.map-wrap {
+  display: none;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 12px 10px;
+}
+#map {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #0b0e14;
+}
+.map-status {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(2px);
+}
+.map-status[hidden] { display: none; }
+.map-hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 800;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(8, 10, 14, .72);
+  color: #e8ebf0;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.map-hint[hidden] { display: none; }
+.leaflet-container {
+  font-family: var(--font);
+  background: #0b0e14;
+}
+.leaflet-control-attribution { font-size: 9px; }
+.leaflet-bar a { color: #23272d; }
+
+/* станции в шите места */
+.map-place-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.map-station {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--metal-row);
+  box-shadow: inset 0 1px 0 var(--hi);
+  color: var(--text);
+  cursor: pointer;
+}
+.map-station:hover { border-color: var(--line-2); }
+.map-station .ms-name { font-size: 14px; font-weight: 600; }
+.map-station .ms-meta { font-size: 11px; color: var(--muted); }
